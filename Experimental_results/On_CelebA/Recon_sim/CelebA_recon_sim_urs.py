@@ -16,7 +16,7 @@ labels = ['0.5', '0.6', '0.7', '0.8', '0.9', '1']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.828760, 0.828073, 0.8304958, 0.829876,  0.829827, 0.833508]
+OUL = [0.8260 , 0.8279, 0.8304, 0.8308,  0.83619, 0.83706410]
 
 org_acc = [0.9999, 0.9999, 0.9999, 0.9999, 0.9999, 0.9999]
 
@@ -47,7 +47,7 @@ plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='fu
 
 
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
@@ -64,7 +64,7 @@ plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E1C855',  marker='^', fillstyle
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
 plt.ylabel('Reconstruction Similarity' ,fontsize=24)
-my_y_ticks = np.arange(0.82, 1.01, 0.02)
+my_y_ticks = np.arange(0.80, 1.01, 0.04)
 plt.yticks(my_y_ticks,fontsize=20)
 plt.xlabel('$\\it USR$ (%)' ,fontsize=20)
 

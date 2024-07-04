@@ -14,9 +14,9 @@ x=[1, 2, 3, 4, 5, 6]
 
 labels = ['0.5', '0.6', '0.7', '0.8', '0.9', '1']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
-
+OUL = [0.826, 0.823, 0.819, 0.821, 0.8200, 0.8178799]
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.824204, 0.82876, 0.824664, 0.82620, 0.8308897, 0.8308799]
+OUL_know = [0.831, 0.831, 0.827, 0.829, 0.83308897, 0.83308799]
 
 org_acc = [0.9999, 0.9999, 0.9999, 0.9999, 0.9999, 0.9999]
 
@@ -43,13 +43,16 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,
          label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+plt.plot(x, OUL_know, linestyle='-.', color='#E07E35',  marker='p', fillstyle='full', markevery=markevery,
+         label='OUbL (Know Unl. Int.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+
 
 
 # plt.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery,

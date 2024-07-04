@@ -17,9 +17,9 @@ labels = ['1', '2', '3', '4', '5', '6']
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
 # data construction time
-OUL = [3.9370, 4.573, 5.4924, 6.06092,  7.079483, 7.5965]
+OUL = [3.920370, 4.573, 5.4924, 6.06092,  7.079483, 7.5965]
 
-org_acc = [61.406, 58.3766, 63.42397, 59.9656, 62.483462, 61.483462]
+org_acc = [61.406, 60.3766, 61.42397, 59.9656, 62.483462, 61.483462]
 
 vbu_acc = [0.630376, 1.2041, 1.898436, 2.39246, 3.08517, 3.57238]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
@@ -42,7 +42,7 @@ markevery=1
 plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
-plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery, label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery, label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 

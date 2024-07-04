@@ -18,14 +18,14 @@ fig.subplots_adjust(bottom=0.25,wspace=0.25)
 
 
 
-labels = [ 'OUL', 'SISA', 'VBU', 'BFU', 'HBFU']
+labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
 # model acc
 unl_on_mnist = [0.9852, 0.9853,0.7869,0.9870, 0.9810 ]
 unl_on_cifar10 = [0.7389, 0.7849, 0.4323, 0.7820, 0.7780 ]
-unl_on_celebA = [0.9572 , 0.9592, 0.9442, 0.9601, 0.9542 ]
+unl_on_celebA = [0.9574 , 0.9592, 0.9353, 0.9601, 0.9542 ]
 
 for i in range(len(labels)):
     unl_on_mnist[i] = unl_on_mnist[i]*100
@@ -46,9 +46,9 @@ width = 0.7  # the width of the bars
 #plt.subplots(figsize=(8, 5.3))
 #plt.bar(x - width / 2 - width / 8 + width / 8, unl_fr, width=0.168, label='Retrain', color='dodgerblue', hatch='/')
 # if the figure are more than 1 line, it will be ax[0,0]
-ax[0].bar(x - width / 2 - width / 8 + width / 8 , unl_on_mnist,   width=0.21, label='On MNIST', color='#9BC985', edgecolor='black', hatch='/')
-ax[0].bar(x - width / 8 - width / 16,  unl_on_cifar10, width=0.21, label='On CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
-ax[0].bar(x + width / 8, unl_on_celebA, width=0.21, label='On CelebA', color='#B595BF',edgecolor='black', hatch='\\')
+ax[0].bar(x - width / 2 - width / 8 + width / 8  + width / 8, unl_on_mnist,   width=0.21, label='On MNIST', color='#9BC985', edgecolor='black', hatch='/')
+ax[0].bar(x - width / 8 - width / 16 + width / 8,  unl_on_cifar10, width=0.21, label='On CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
+ax[0].bar(x + width / 8 + width / 8, unl_on_celebA, width=0.21, label='On CelebA', color='#B595BF',edgecolor='black', hatch='\\')
 # ax[0].bar( x + width / 2 - width / 8 + width / 16, unl_ms_not_in, width=0.21, label='MS Not In', color='#797BB7', edgecolor='black', hatch='x')
 
 
@@ -99,7 +99,7 @@ ax[0].set_yticks(my_y_ticks )
 
 
 
-labels = [ 'OUL', 'SISA', 'VBU', 'BFU', 'HBFU']
+labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
@@ -107,7 +107,7 @@ labels = [ 'OUL', 'SISA', 'VBU', 'BFU', 'HBFU']
 # model back acc
 unl_on_mnist = [0.0967, 0.0967, 0.0000, 0.0916, 0.0255]
 unl_on_cifar10 = [0.0940, 0.0760, 0.0000, 0.0970, 0.1804]
-unl_on_celebA = [0.0471 , 0.0441, 0.0492, 0.4192, 0.8193]
+unl_on_celebA = [0.0541 , 0.0531, 0.0664, 0.4192, 0.8193]
 
 
 x = np.arange(len(labels))  # the label locations
@@ -123,9 +123,9 @@ width = 0.7  # the width of the bars
 
 #plt.subplots(figsize=(8, 5.3))
 #plt.bar(x - width / 2 - width / 8 + width / 8, unl_fr, width=0.168, label='Retrain', color='dodgerblue', hatch='/')
-ax[1].bar(x - width / 2 - width / 8 + width / 8 , unl_on_mnist,   width=0.21, label='On MNIST', color='#9BC985', edgecolor='black', hatch='/')
-ax[1].bar(x - width / 8 - width / 16,  unl_on_cifar10, width=0.21, label='On CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
-ax[1].bar(x + width / 8, unl_on_celebA, width=0.21, label='On CelebA', color='#B595BF',edgecolor='black', hatch='\\')
+ax[1].bar(x - width / 2 - width / 8 + width / 8 + width / 8, unl_on_mnist,   width=0.21, label='On MNIST', color='#9BC985', edgecolor='black', hatch='/')
+ax[1].bar(x - width / 8 - width / 16 + width / 8,  unl_on_cifar10, width=0.21, label='On CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
+ax[1].bar(x + width / 8 + width / 8, unl_on_celebA, width=0.21, label='On CelebA', color='#B595BF',edgecolor='black', hatch='\\')
 #ax[1].bar( x + width / 2 - width / 8 + width / 16, unl_ms_not_in, width=0.21, label='MS Not In', color='#797BB7', edgecolor='black', hatch='x')
 
 
@@ -241,7 +241,7 @@ ax[1].set_yticks(my_y_ticks )
 #picture 4
 
 
-labels = [ 'OUL', 'SISA', 'VBU', 'BFU', 'HBFU']
+labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
@@ -251,9 +251,9 @@ labels = [ 'OUL', 'SISA', 'VBU', 'BFU', 'HBFU']
 # unl_on_cifar10 = [0.87385, 0.8731, 0.87280, 0.87358, 0.873049 ]
 # unl_on_celebA = [0.82807, 0.82762, 0.83108, 0.830676 , 0.83067 ]
 
-unl_on_mnist = [3.920, 11.70, 0.63, 16.03, 18.32]
-unl_on_cifar10 = [6.63, 103, 0.58, 141.26, 149]
-unl_on_celebA = [0.709, 133.74, 0.65, 176.86 , 183]
+unl_on_mnist = [3.920, 11.70, 0.631, 16.03, 18.32]
+unl_on_cifar10 = [6.633, 103, 0.587, 141.26, 149]
+unl_on_celebA = [2.257, 133.74, 0.672, 176.86, 183]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.7  # the width of the bars
@@ -268,9 +268,9 @@ width = 0.7  # the width of the bars
 
 #plt.subplots(figsize=(8, 5.3))
 #plt.bar(x - width / 2 - width / 8 + width / 8, unl_fr, width=0.168, label='Retrain', color='dodgerblue', hatch='/')
-ax[2].bar(x - width / 2 - width / 8 + width / 8 , unl_on_mnist,   width=0.21, label='SS In', color='#9BC985', edgecolor='black', hatch='/')
-ax[2].bar(x - width / 8 - width / 16,  unl_on_cifar10, width=0.21, label='SS Not In', color='#F7D58B', edgecolor='black', hatch='*')
-ax[2].bar(x + width / 8, unl_on_celebA, width=0.21, label='MS In', color='#B595BF',edgecolor='black', hatch='\\')
+ax[2].bar(x - width / 2 - width / 8 + width / 8 + width / 8, unl_on_mnist,   width=0.21, label='SS In', color='#9BC985', edgecolor='black', hatch='/')
+ax[2].bar(x - width / 8 - width / 16 + width / 8 ,  unl_on_cifar10, width=0.21, label='SS Not In', color='#F7D58B', edgecolor='black', hatch='*')
+ax[2].bar(x + width / 8 + width / 8 , unl_on_celebA, width=0.21, label='MS In', color='#B595BF',edgecolor='black', hatch='\\')
 # ax[2].bar( x + width / 2 - width / 8 + width / 16, unl_ms_not_in, width=0.21, label='MS Not In', color='#797BB7', edgecolor='black', hatch='x')
 
 

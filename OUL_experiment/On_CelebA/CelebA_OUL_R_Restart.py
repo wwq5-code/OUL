@@ -673,6 +673,9 @@ def train_reconstructor(vib, train_loader, reconstruction_function, args):
     reconstructor.train()
     epochs = 1
 
+    optimizer_vib_reconstruction = torch.optim.Adam(vib.decoder.parameters(), lr=args.lr)
+
+
     ## training epochs
     total_training_samples = 50000*0.06
     erased_samples = 50000*args.erased_local_r
@@ -693,8 +696,10 @@ def train_reconstructor(vib, train_loader, reconstruction_function, args):
             loss = reconstruction_function(x_hat, img)
 
             optimizer_recon.zero_grad()
+            optimizer_vib_reconstruction.zero_grad()
             loss.backward()
             optimizer_recon.step()
+            optimizer_vib_reconstruction.step()
             cos_sim = cosine_similarity(x_hat.view(1, -1), img.view(1, -1))
             similarity_term.append(cos_sim.item())
             loss_list.append(loss.item())
@@ -703,9 +708,52 @@ def train_reconstructor(vib, train_loader, reconstruction_function, args):
 
         print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
         print("cosine similarity:", sum(similarity_term)/len(similarity_term), "average loss:", sum(loss_list)/len(loss_list))
-
     return reconstructor
 
+
+def evaluate_reconstructor(vib, reconstructor, train_loader, reconstruction_function, args):
+    # init reconsturctor
+    # reconstructor = LinearModel(n_feature=40, n_output=28 * 28).to(args.device)
+    vib.decoder.trainable = False
+    vib.fc3.trainable = False
+
+
+    optimizer_recon = torch.optim.Adam(reconstructor.parameters(), lr=args.lr)
+    reconstructor.train()
+    epochs = 1
+
+    ## training epochs
+    total_training_samples = 50000*0.06
+    erased_samples = 50000*args.erased_local_r
+    epochs= int(total_training_samples/erased_samples)
+
+
+    for epoch in range(1):
+        similarity_term = []
+        loss_list = []
+        for grad, img in train_loader:
+            grad, img = grad.to(args.device), img.to(args.device)  # (B, C, H, W), (B, 10)
+            grad = grad.view(grad.size(0), 1, 16, 16)
+            # img = img.view(img.size(0), -1)  # Flatten the images
+            output = reconstructor(grad)
+            # output = output.view(output.size(0), 3, 32, 32)
+            x_hat = vib.reconstruction(output, img)
+            img = img.view(img.size(0), -1)  # Flatten the images
+            loss = reconstruction_function(x_hat, img)
+
+            # optimizer_recon.zero_grad()
+            # loss.backward()
+            # optimizer_recon.step()
+            cos_sim = cosine_similarity(x_hat.view(1, -1), img.view(1, -1))
+            similarity_term.append(cos_sim.item())
+            loss_list.append(loss.item())
+            break
+
+
+
+        print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
+        print("constructed learning cosine similarity:", sum(similarity_term)/len(similarity_term), "average loss:", sum(loss_list)/len(loss_list))
+    return reconstructor
 
 # Function to add Laplace noise
 def add_laplace_noise(tensor, epsilon, sensitivity, args):
@@ -757,7 +805,7 @@ args.unlearn_learning_rate = 0.1
 args.ep_distance = 20
 args.dimZ = 128  # 40 # 2
 args.batch_size = 160
-args.erased_local_r = 0.000009 #0.006  # when ratio value is 0.000009, the sample is 1. 0.002 # the erased data ratio
+args.erased_local_r = 0.006 #0.000009 #0.006  # when ratio value is 0.000009, the sample is 1. 0.002 # the erased data ratio
 args.construct_size = 0.006
 args.auxiliary_size = 0.006
 args.train_type = "MULTI"
@@ -972,7 +1020,7 @@ acc = eva_vib(unlearned_vib, test_loader, args, name='unlearned model on test da
 print("prepare unlearning with DP noise")
 unlearned_vib_with_noise = copy.deepcopy(vib)
 start_time = time.time()
-unlearned_vib_with_noise  = prepare_unl(dataloader_erasing_with_tri, unlearned_vib, loss_fn, args, "noise")
+unlearned_vib_with_noise = prepare_unl(dataloader_erasing_with_tri, unlearned_vib, loss_fn, args, "noise")
 end_time = time.time()
 running_time = end_time - start_time
 print(f'unlearning with dp {running_time} seconds')
@@ -1142,5 +1190,55 @@ start_time = time.time()
 reconstructor_er_re = train_reconstructor(copy.deepcopy(fixed_vib_2), er_reconstruction_set_loader, reconstruction_function, args)
 end_time = time.time()
 running_time_recon = end_time - start_time
-print(f'reconstruction Training took {running_time_recon} seconds')
+print(f'reconstruction with unlearning intentions Training took {running_time_recon} seconds')
+
+
+
+# dataloader_constructing1
+
+# reconstruction without the knowledge of unlearning
+
+dim_z = 256
+temp_grad = torch.empty(0, dim_z).float().to(args.device)
+temp_img_cons = torch.empty(0, 3, 32, 32).float().to(args.device)
+
+empty_tensor = torch.Tensor([])
+for step, (x, y) in enumerate(dataloader_constructing1):
+    x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
+    for (name1, param1), (name2, param2) in zip(vib.named_parameters(), fixed_vib_2.named_parameters()):
+        # Calculate the difference (delta) needed to update model1 towards model2
+        if name1 == 'encoder.linear_head.bias':
+
+            temp_img_cons = torch.cat([temp_img_cons, x], dim=0)
+            delta = param2.data.view(-1) - param1.data.view(-1)
+            flat_delta = torch.flatten(delta)
+            # empty_tensor = torch.cat((empty_tensor, flat_delta), dim=0)
+            B, C, H, W = x.size()
+
+            mean = 1  # Mean of the distribution
+            std_dev = 0.4  # Standard deviation of the distribution
+
+            # Generate Gaussian noise
+            random_tensor = torch.randn(B, dim_z) * std_dev + mean
+            random_tensor = random_tensor.cuda()
+            # random_tensor = torch.rand(B, dim_z).cuda()
+            scaled_random_tensor = random_tensor / random_tensor.sum() * B * dim_z
+
+            for scale_v in scaled_random_tensor:
+                flat_delta = flat_delta.view(1, 256)
+                mean_t_grad = flat_delta.mean()
+                std_t_grad = flat_delta.std()
+                flat_delta = flat_delta * scale_v
+                temp_grad = torch.cat([temp_grad, flat_delta], dim=0)
+
+recon_set_cons = Data.TensorDataset(temp_grad, temp_img_cons)
+cons_set_loader = DataLoader(recon_set_cons, batch_size=args.batch_size, shuffle=True)
+
+start_time = time.time()
+
+reconstructor_er_re = train_reconstructor(copy.deepcopy(fixed_vib_2), cons_set_loader, reconstruction_function, args)
+reconstructor_er_re = evaluate_reconstructor(copy.deepcopy(fixed_vib_2), reconstructor_er_re, er_reconstruction_set_loader, reconstruction_function, args)
+end_time = time.time()
+running_time_recon = end_time - start_time
+print(f'reconstruction with unlearning intentions Training took {running_time_recon} seconds')
 

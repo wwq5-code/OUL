@@ -17,7 +17,7 @@ labels = ['1', '2', '3', '4', '5', '6']
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
 # data construction time
-OUL = [6.1125, 7.373, 8.26683, 9.377835, 10.3865, 11.41485]
+OUL = [6.633, 7.373, 8.26683, 9.377835, 10.3865, 11.41485]
 
 org_acc = [491.932, 490.468, 490.468, 490.7103, 490.7103, 490.7103]
 
@@ -43,7 +43,7 @@ markevery=1
 plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
-plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery, label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery, label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 

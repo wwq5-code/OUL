@@ -16,7 +16,7 @@ labels = ['0.2', '0.4', '0.6', '0.8', '1']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [ 0.94174, 0.94159, 0.94144, 0.9413384, 0.94114]
+OUL = [ 0.9425174, 0.9423159, 0.9422144, 0.94213384, 0.9420114]
 
 org_acc = [0.94293, 0.944136, 0.947731, 0.94769657, 0.94818, 0.948180]
 
@@ -38,7 +38,7 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
@@ -50,7 +50,7 @@ plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 # plt.grid()
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
-plt.ylabel('Forgeability' ,fontsize=24)
+plt.ylabel('Unlearning Update Similarity' ,fontsize=24)
 my_y_ticks = np.arange(0.94, 0.944, 0.001)
 plt.yticks(my_y_ticks,fontsize=20)
 plt.xlabel('Patch Ratio $\\beta$',fontsize=20)

@@ -7,14 +7,14 @@ labels = ['1', '2', '3', '4', '5', '6']
 
 
 
-unl_muv_MNIST = [3.9063, 7.17106  , 9.923 , 13.39719, 16.33203, 19.7248]
-unl_mib_MNIST = [3.9063 , 7.17106 , 9.923 , 13.39719, 16.33203, 19.7248]
+unl_muv_MNIST = [3.92063, 7.17106  , 9.923 , 13.39719, 16.33203, 19.7248]
+unl_mib_MNIST = [3.92063 , 7.17106 , 9.923 , 13.39719, 16.33203, 19.7248]
 
-unl_muv_CIFAR = [5.723, 9.9689  , 14.737 , 18.6452 , 24.2110, 27.3431]
-unl_mib_CIFAR = [5.723 , 9.9689 , 14.737 , 18.6452 , 24.2110, 27.3431]
+unl_muv_CIFAR = [6.663723, 9.9689  , 14.737 , 18.6452 , 24.2110, 27.3431]
+unl_mib_CIFAR = [6.66372 , 9.9689 , 14.737 , 18.6452 , 24.2110, 27.3431]
 
-unl_muv_CelebA = [0.7187, 0.7975 , 0.893441, 0.92758, 0.96961789, 0.9667689]
-unl_mib_CelebA = [0.7187 , 0.7975 , 0.89344, 0.92758, 0.969617806, 0.9667689]
+unl_muv_CelebA = [2.257, 0.710 +2.2, 0.833441+2.7, 0.80758+3, 0.91+3.3, 1.08+4.01]
+unl_mib_CelebA = [2.257 , 0.710 +2.2, 0.83344+2.7, 0.80758+3, 0.91+3.3, 1.08+4.01]
 
 
 
@@ -43,12 +43,12 @@ plt.figure()
 
 
 # F7D58B, 9CD1C8, C6B3D3, E58579
-plt.bar(x - width / 4  , unl_mib_MNIST,   width=width/4, label='OUL on MNIST', color='#C6B3D3', edgecolor='black',  hatch='x')
+plt.bar(x - width / 4  , unl_mib_MNIST,   width=width/4, label='OUbL on MNIST', color='#C6B3D3', edgecolor='black',  hatch='x')
 
 # F7D58B , 6BB7CA
-plt.bar(x , unl_mib_CIFAR, width=width/4, label='OUL on CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
+plt.bar(x , unl_mib_CIFAR, width=width/4, label='OUbL on CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
 
-plt.bar(x + width / 4 , unl_muv_CelebA, width=width/4, label='OUL on CelebA', color='#E58579', edgecolor='black', hatch='o')
+plt.bar(x + width / 4 , unl_muv_CelebA, width=width/4, label='OUbL on CelebA', color='#E58579', edgecolor='black', hatch='o')
 
 
 #plt.bar(x + width / 6 + width / 6 + width/6  , unl_mib_CelebA,   width=width/6, label='MIB CelebA', color='#E58579', edgecolor='black', hatch='\\')

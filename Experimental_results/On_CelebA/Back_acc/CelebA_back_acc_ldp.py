@@ -16,13 +16,13 @@ labels = ['2', '4', '6', '8', '10']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.0471, 0.0543, 0.0471, 0.0543, 0.0471]
+OUL = [0.0455, 0.0455, 0.0455, 0.0455, 0.0455]
 
-org_acc = [0.8597, 0.8576, 0.8597, 0.8576, 0.8576]
+org_acc = [0.7995, 0.7995, 0.7995, 0.7995, 0.7995]
 
-bfu_acc = [0.4193, 0.4193, 0.4193,0.4192, 0.4192]
+bfu_acc = [0.4192, 0.4192, 0.4192,0.4192, 0.4192]
 
-vbu_acc = [0.0492, 0.0666, 0.0492, 0.0666, 0.0492]
+vbu_acc = [0.0492, 0.0492, 0.0492, 0.0492, 0.0492]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
 vbu_ldp_acc = [0.3484, 0.3371, 0.2193, 0.1363, 0.0820]
 
@@ -47,7 +47,7 @@ plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='fu
 
 
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 

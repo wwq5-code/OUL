@@ -16,7 +16,7 @@ labels = ['1', '2', '3', '4', '5', '6']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [ 0.9864, 0.9855, 0.9815, 0.9819, 0.9853, 0.9840]
+OUL = [ 0.9852, 0.9855, 0.9815, 0.9819, 0.9853, 0.9840]
 
 org_acc = [0.9902, 0.9854, 0.9842, 0.9908, 0.9890, 0.9890]
 
@@ -44,7 +44,7 @@ plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='fu
 
 
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 

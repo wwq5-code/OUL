@@ -16,7 +16,7 @@ labels = ['1', '2', '3', '4', '5', '6']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.95956, 0.956567, 0.948779, 0.95821, 0.95237, 0.9540212]
+OUL = [0.959056, 0.9590567, 0.9590779, 0.95921, 0.95937, 0.95940212]
 
 org_acc = [0.9907, 0.9854, 0.9890, 0.9890, 0.9863, 0.9843]
 
@@ -38,7 +38,7 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
@@ -50,8 +50,8 @@ plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 # plt.grid()
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
-plt.ylabel('Forgeability' ,fontsize=24)
-my_y_ticks = np.arange(0.86, 0.96, 0.02)
+plt.ylabel('Unlearning Update Similarity' ,fontsize=24)
+my_y_ticks = np.arange(0.95, 0.97, 0.004)
 plt.yticks(my_y_ticks,fontsize=20)
 plt.xlabel('$\it{CSR}$ and $\it{ASR}$ (%)',fontsize=20)
 

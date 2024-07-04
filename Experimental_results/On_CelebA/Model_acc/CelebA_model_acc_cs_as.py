@@ -16,7 +16,7 @@ labels = ['0.5', '0.6', '0.7', '0.8', '0.9', '1']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [ 0.9572, 0.9582, 0.95904, 0.95954, 0.9603, 0.9604]
+OUL = [ 0.9574, 0.9582, 0.95904, 0.95954, 0.9603, 0.9604]
 
 org_acc = [0.9610, 0.9610, 0.9610, 0.9610, 0.9610, 0.9610]
 
@@ -40,7 +40,7 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,
