@@ -32,8 +32,8 @@ On MNIST, USR = 1%
 | --------                  | --------    | -------- | -------- | -------- |  
 | Model Utility (Acc.)      | 98.52%      | 98.70%   |  98.53%  | 78.69%   | 
 | Data Removal (Bac. Acc.)  | 9.67%       | 9.16%    | 9.67%    | 0.00%    |  
-| Forgeability              | 0.249       | -        | -        | -        | 
-| Reconstruction Similarity | 0.874       | 0.874    | 1        | 1        |  
+| Forgeability              | 0.942       | -        | -        | -        | 
+| Reconstruction Similarity | 0.818       | 0.874    | 1        | 1        |  
 | Running time (s)          | 3.920       | 16.03    | 11.70    | 0.63     |  
 
 In this table, we can achieve these metric values by running corresponding python files.

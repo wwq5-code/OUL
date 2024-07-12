@@ -137,7 +137,7 @@ ax[1].bar(x + width / 8 + width / 8, unl_on_celebA, width=0.21, label='On CelebA
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
 # ax[1].set_ylabel('Average UE', fontsize=20)
-ax[1].set_ylabel('Backdoor Accuracy', fontsize=20)
+ax[1].set_ylabel('Backdoor Acc. (%)', fontsize=20)
 # ax.set_title('Performance of Different Users n')
 ax[1].set_xticks(x)
 ax[1].set_xticklabels(labels ,fontsize=13)
@@ -283,7 +283,7 @@ ax[2].bar(x + width / 8 + width / 8 , unl_on_celebA, width=0.21, label='MS In', 
 # Add some text for labels, title and custom x-axis tick labels, etc.
 # ax[1].set_ylabel('Average UE', fontsize=20)
 # ax.set_title('Performance of Different Users n')
-ax[2].set_ylabel('Running Time', fontsize=20)
+ax[2].set_ylabel('Running Time (s)', fontsize=20)
 ax[2].set_xticks(x)
 ax[2].set_xticklabels(labels ,fontsize=13)
 # ax.set_xticklabels(labels,fontsize=15)

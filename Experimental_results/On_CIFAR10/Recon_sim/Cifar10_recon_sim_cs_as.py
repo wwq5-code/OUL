@@ -74,7 +74,7 @@ plt.xticks(x, labels, fontsize=20)
 
 
 # plt.title('(c) Utility Preservation', fontsize=24)
-plt.legend(loc='best',fontsize=20)
+plt.legend(loc=(0.05,0.56),fontsize=20)
 plt.tight_layout()
 #plt.title("MNIST")
 plt.rcParams['figure.figsize'] = (2.0, 1)
