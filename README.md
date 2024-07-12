@@ -1,4 +1,4 @@
-# OUL
+# OUbL
 
 # Oblivious Unlearning by Learning: Machine Unlearning Without Exppsing Erased Data
 ## Overview
