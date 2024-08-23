@@ -22,7 +22,7 @@ We also show the requirements packages in requirements.txt
 
 Here, we demonstrate the overall evaluations, which are also the main achievement claimed in the paper. We will explain the results and demonstrate how to achieve these results using the script and corresponding parameters.
 
-Evaluated on 1080ti GPUs,
+Evaluated on NVIDIA Quadro RTX 6000 GPUs,
 
 ### TABLE I: General Evaluation Results on MNIST, CIFAR10 and CelebA:
 
