@@ -56,3 +56,8 @@ python /OUL/OUL_experiment/On_CelebA/CelebA_OUL_R_Restart.py
 Note that, to sucessfully run the program on CelebA, we need first prepare the CelebA dataset, which can be downloaded from: 
 (https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg)
  
+
+
+
+
+ 

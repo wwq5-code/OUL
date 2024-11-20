@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim
 import torchvision
-from torchvision.datasets import MNIST, CIFAR10, FashionMNIST, CIFAR100, CelebA
+from torchvision.datasets import MNIST, CIFAR10, FashionMNIST, CIFAR100
 from torch.utils.data import DataLoader, TensorDataset, random_split, ConcatDataset
 import torch.utils.data as Data
 import torch.nn.functional as F
@@ -24,7 +24,7 @@ import copy
 import random
 import time
 from torch.nn.functional import cosine_similarity
-
+from torchmetrics.classification import BinaryAUROC, Accuracy
 
 
 
@@ -155,12 +155,10 @@ def add_trigger_new(add_backdoor, dataset, poison_samples_size, mode):
             # plt.show()
 
             # add trigger as general backdoor
-            # x[:, width - 3, height - 3] = 1
-            # x[:, width - 3, height - 4] = 1
-            # x[:, width - 4, height - 3] = 1
-            # x[:, width - 4, height - 4] = 1
-            temp = 1 - x[:, -7:-2, -7:-2]
-            x[:, -7:-2, -7:-2] = x[:, -7:-2, -7:-2] + temp * args.laplace_scale
+            x[:, width - 3, height - 3] = args.laplace_scale
+            x[:, width - 3, height - 4] = args.laplace_scale
+            x[:, width - 4, height - 3] = args.laplace_scale
+            x[:, width - 4, height - 4] = args.laplace_scale
 
             list_from_dataset_tuple[i] = x, 7
             list_from_dataset_tuple_target[i] = x, y
@@ -192,7 +190,7 @@ class VIB(nn.Module):
         self.encoder = encoder
         self.approximator = approximator
         self.decoder = decoder
-        self.fc3 = nn.Linear(3 * 32 * 32, 3 * 32 * 32)  # output
+        self.fc3 = nn.Linear(28 * 28, 28 * 28)  # output
 
     def explain(self, x, mode='topk'):
         """Returns the relevance scores
@@ -325,7 +323,7 @@ def vib_train(dataset, model, loss_fn, reconstruction_function, args, epoch, tra
         BCE = reconstruction_function(x_hat, x)
         # Calculate the L2-norm
 
-        loss = args.beta * KLD_mean + H_p_q # + args.mse_rate * BCE
+        loss = args.beta * KLD_mean + args.mse_rate * BCE + H_p_q
 
         optimizer.zero_grad()
         loss.backward()
@@ -356,18 +354,18 @@ def vib_train(dataset, model, loss_fn, reconstruction_function, args, epoch, tra
                   + ', '.join([f'{k} {v:.3f}' for k, v in metrics.items()]))
             x_cpu = x.cpu().data
             x_cpu = x_cpu.clamp(0, 1)
-            x_cpu = x_cpu.view(x_cpu.size(0), 3, 32, 32)
+            x_cpu = x_cpu.view(x_cpu.size(0), 1, 28, 28)
             grid = torchvision.utils.make_grid(x_cpu, nrow=4)
             # plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
             # plt.show()
 
             x_hat_cpu = x_hat.cpu().data
             x_hat_cpu = x_hat_cpu.clamp(0, 1)
-            x_hat_cpu = x_hat_cpu.view(x_hat_cpu.size(0), 3, 32, 32)
+            x_hat_cpu = x_hat_cpu.view(x_hat_cpu.size(0), 1, 28, 28)
             grid = torchvision.utils.make_grid(x_hat_cpu, nrow=4)
-            # plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
+            plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
             # plt.show()
-            print("print x grad")
+            # print("print x grad")
             # print(input_gradient)
 
     return model
@@ -415,7 +413,7 @@ def prepare_unl(erasing_dataset, model, loss_fn, args, noise_flag):
                       + ', '.join([f'{k} {v:.3f}' for k, v in metrics.items()]))
                 x_cpu = x_e.cpu().data
                 x_cpu = x_cpu.clamp(0, 1)
-                x_cpu = x_cpu.view(x_cpu.size(0), 3, 32, 32)
+                x_cpu = x_cpu.view(x_cpu.size(0), 1, 28, 28)
                 grid = torchvision.utils.make_grid(x_cpu, nrow=4)
                 # plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
                 # plt.show()
@@ -450,7 +448,7 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-    temp_img = torch.empty(0, 3, 32, 32).float().to(args.device)
+    temp_img = torch.empty(0, 1, 28, 28).float().to(args.device)
     temp_label = torch.empty(0).long().to(args.device)
 
     for step, (x, y) in enumerate(dataset):
@@ -458,8 +456,11 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
         # x = x.view(x.size(0), -1)
         b_s, _, width, height = x.shape
         init_random_x = torch.zeros_like(x).to(args.device)
-        init_random_x[:, :, -7:-2, -7:-2] = args.laplace_scale
-        random_patch = init_random_x[:, :, -7:-2, -7:-2]
+        init_random_x[:, :, width - 3, height - 3] = args.laplace_scale/4
+        init_random_x[:, :, width - 3, height - 4] = args.laplace_scale/4
+        init_random_x[:, :, width - 4, height - 3] = args.laplace_scale/4
+        init_random_x[:, :, width - 4, height - 4] = args.laplace_scale/4
+        random_patch = init_random_x # [:, :, -4:-2, -4:-2]
         break
 
     for step, (x, y) in enumerate(dataset):
@@ -475,7 +476,8 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
         random_patch.requires_grad = True
         optimizer_x = torch.optim.Adam([random_patch], 0.1)
         x2 = x
-        x2[:, :, -7:-2, -7:-2] = x2[:, :, -7:-2, -7:-2] + random_patch
+        x10 = x
+        x2 = x2 + random_patch  #[:, :, -4:-2, -4:-2]
         x2 = x2.clamp(0, 1)
         logits_z, logits_y, x_hat, mu, logvar = model(x2, mode='with_reconstruction')  # (B, C* h* w), (B, N, 10)
 
@@ -513,10 +515,10 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
 
         l1_norm = torch.norm(input_gradient, p=1)
         epsilon = args.ep_distance
-        # piece_v = (epsilon - l1_norm) / (b_s * 4)
+        piece_v = (epsilon - l1_norm) / (b_s * 4)
         # input_gradient = input_gradient / l1_norm * 16
-        x[:, :, -7:-2, -7:-2] = x[:, :, -7:-2, -7:-2] + random_patch.detach()
-        updated_x = x.clamp(0, 1)
+        x = x + random_patch.detach()  #[:, :, -4:-2, -4:-2], [:, :, -4:-2, -4:-2]
+        updated_x = x.clamp(0, 1) #- input_gradient # if we optimizer step, we don't need subtract
         input_gradient = input_gradient
         temp_img = torch.cat([temp_img, updated_x.detach()], dim=0)
         temp_label = torch.cat([temp_label, y.detach()], dim=0)
@@ -544,22 +546,21 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
         if step % len(dataset) % 10000 == 0:
             print(f'[{epoch}/{0 + args.num_epochs}:{step % len(dataset):3d}] '
                   + ', '.join([f'{k} {v:.3f}' for k, v in metrics.items()]))
-            x_cpu = x.cpu().data
+            x_cpu = x10.cpu().data
             x_cpu = x_cpu.clamp(0, 1)
-            x_cpu = x_cpu.view(x_cpu.size(0), 3, 32, 32)
+            x_cpu = x_cpu.view(x_cpu.size(0), 1, 28, 28)
             grid = torchvision.utils.make_grid(x_cpu, nrow=4)
             plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
             plt.show()
 
             x_hat_cpu = updated_x.cpu().data
             x_hat_cpu = x_hat_cpu.clamp(0, 1)
-            x_hat_cpu = x_hat_cpu.view(x_hat_cpu.size(0), 3, 32, 32)
+            x_hat_cpu = x_hat_cpu.view(x_hat_cpu.size(0), 1, 28, 28)
             grid = torchvision.utils.make_grid(x_hat_cpu, nrow=4)
             plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
             plt.show()
             print(acc)
-            # print("print x grad")
-            # print(input_gradient[:, :,  -7:-2, -7:-2])
+            print("print x grad")
             # print(updated_x)
     d = Data.TensorDataset(temp_img, temp_label)
     d_loader = DataLoader(d, batch_size=args.batch_size, shuffle=True)
@@ -634,12 +635,9 @@ def train_reconstructor(vib, train_loader, reconstruction_function, args):
     reconstructor.train()
     epochs = 1
 
-    optimizer_vib_reconstruction = torch.optim.Adam(vib.decoder.parameters(), lr=args.lr)
-
-
     ## training epochs
-    total_training_samples = 50000*0.2
-    erased_samples = 50000*args.erased_local_r
+    total_training_samples = 60000*0.2
+    erased_samples = 60000*args.erased_local_r
     epochs= int(total_training_samples/erased_samples)
 
 
@@ -657,10 +655,8 @@ def train_reconstructor(vib, train_loader, reconstruction_function, args):
             loss = reconstruction_function(x_hat, img)
 
             optimizer_recon.zero_grad()
-            optimizer_vib_reconstruction.zero_grad()
             loss.backward()
             optimizer_recon.step()
-            optimizer_vib_reconstruction.step()
             cos_sim = cosine_similarity(x_hat.view(1, -1), img.view(1, -1))
             similarity_term.append(cos_sim.item())
             loss_list.append(loss.item())
@@ -684,8 +680,8 @@ def evaluate_reconstructor(vib, reconstructor, train_loader, reconstruction_func
     epochs = 1
 
     ## training epochs
-    total_training_samples = 50000*0.2
-    erased_samples = 50000*args.erased_local_r
+    total_training_samples = 60000*0.2
+    erased_samples = 60000*args.erased_local_r
     epochs= int(total_training_samples/erased_samples)
 
 
@@ -702,15 +698,13 @@ def evaluate_reconstructor(vib, reconstructor, train_loader, reconstruction_func
             img = img.view(img.size(0), -1)  # Flatten the images
             loss = reconstruction_function(x_hat, img)
 
-            # optimizer_recon.zero_grad()
-            # loss.backward()
-            # optimizer_recon.step()
+            optimizer_recon.zero_grad()
+            loss.backward()
+            optimizer_recon.step()
             cos_sim = cosine_similarity(x_hat.view(1, -1), img.view(1, -1))
             similarity_term.append(cos_sim.item())
             loss_list.append(loss.item())
-
-
-
+            break  ## one batch for test is ok
 
         print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
         print("constructed learning cosine similarity:", sum(similarity_term)/len(similarity_term), "average loss:", sum(loss_list)/len(loss_list))
@@ -738,6 +732,21 @@ def add_laplace_noise(tensor, epsilon, sensitivity, args):
     return noisy_tensor
 
 
+class CustomLabelDataset(Dataset):
+    def __init__(self, dataset, label):
+        self.dataset = dataset
+        self.label = label
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        data, _ = self.dataset[idx]  # Ignore the original label
+        return data, self.label
+
+
+
+
 
 seed = 0
 torch.cuda.manual_seed_all(seed)
@@ -756,8 +765,8 @@ args.gpu = 0
 args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
 args.iid = True
 args.model = 'z_linear'
-args.num_epochs = 10
-args.dataset = 'CIFAR10'
+args.num_epochs = 1
+args.dataset = 'MNIST'
 args.add_noise = False
 args.beta = 0.0001
 args.mse_rate = 0.1
@@ -766,15 +775,15 @@ args.unlearn_learning_rate = 0.1
 args.ep_distance = 20
 args.dimZ = 128  # 40 # 2
 args.batch_size = 16
-args.erased_local_r = 0.01 #0.00002 #0.01  # when ratio value is 0.000017, the sample is 1. 0.002 # the erased data ratio
-args.construct_size = 0.01
-args.auxiliary_size = 0.01
+args.erased_local_r = 0.01 # 0.000017 #0.01  # when ratio value is 0.000017, the sample is 1. 0.002 # the erased data ratio
+args.construct_size = 0.04
+args.auxiliary_size = 0.04
 args.train_type = "MULTI"
 args.kld_to_org = 1
 args.unlearn_bce = 0.3
 args.self_sharing_rate = 0.8
 args.laplace_scale = 0.8
-args.laplace_epsilon = 10
+args.laplace_epsilon = 10 ## when 10 means
 args.num_epochs_recon = 50 # 50
 
 ### 1: 0.000017, 20: 0.00034, 40: 0.00067, 60: 0.001, 80: 0.00134, 100: 0.00167
@@ -827,8 +836,19 @@ remaining_set_wo_aux, auxiliary_set = torch.utils.data.random_split(remaining_se
                                                                     [remaining_set_wo_aux_size, auxiliary_size])
 # this is the final remaining dataset, without the erasing dataset, and the auxiliary dataset
 print(len(remaining_set_wo_aux))
-print("erasing_set",len(erasing_set))
+print('erased size', len(erasing_set))
 # print(len(remaining_set_w_o_twin.dataset.data))
+
+selected_trained_set, temp_remain = torch.utils.data.random_split(remaining_set_wo_aux, [5000, remaining_set_wo_aux_size -5000])
+selected_test_set, temp_remain = torch.utils.data.random_split(test_set, [5000,  5000])
+# Wrap the datasets with custom labels
+labeled_trained_set = CustomLabelDataset(selected_trained_set, 1)
+labeled_test_set = CustomLabelDataset(selected_test_set, 0)
+
+# Concatenate the datasets
+concatenated_dataset = ConcatDataset([labeled_trained_set, labeled_test_set])
+
+
 
 # it is the final remaining dataset
 dataloader_remaining_after_aux = DataLoader(remaining_set_wo_aux, batch_size=args.batch_size, shuffle=True)
@@ -867,7 +887,7 @@ erasing_with_tri, erasing_with_tri_tar = add_trigger_new(add_backdoor, dataset2,
 dataloader_erasing_with_tri = DataLoader(erasing_with_tri, batch_size=args.batch_size, shuffle=True)
 dataloader_erasing_with_tri_tar = DataLoader(erasing_with_tri_tar, batch_size=args.batch_size, shuffle=True)
 
-combined_dataset = ConcatDataset([dataset1, erasing_with_tri])
+combined_dataset = ConcatDataset([dataset1, erasing_with_tri, dataset2]) # with original dataset2, to show the noise extent.
 dataloader_remaining_and_erasing = DataLoader(combined_dataset, batch_size=args.batch_size, shuffle=True)
 
 sim_list = []
@@ -896,14 +916,11 @@ if args.dataset == "MNIST":
     x = x.view(x.size(0), 1, 28, 28)
 elif args.dataset == "CIFAR10":
     x = x.view(1, 3, 32, 32)
-elif args.dataset == "CelebA":
-    x = x.view(1, 3, 32, 32)
-
 print(x)
 grid = torchvision.utils.make_grid(x, nrow=1)
 # grid = torchvision.utils.make_grid(x, nrow=1, cmap="gray")
 # plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
-# plt.show()
+# plt.show()if name == 'encoder.linear_head.bias':
 
 
 vib, lr = init_vib(args)
@@ -991,7 +1008,7 @@ for param1, param2 in zip(unlearned_vib.approximator.parameters(), vib.approxima
 
 dim_z = 256
 temp_grad = torch.empty(0, dim_z).float().to(args.device)
-temp_img = torch.empty(0, 3, 32, 32).float().to(args.device)
+temp_img = torch.empty(0, 1, 28, 28).float().to(args.device)
 empty_tensor = torch.Tensor([])
 for step, (x, y) in enumerate(dataloader_erasing_with_tri):
     x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
@@ -1039,8 +1056,8 @@ print(f'reconstruction Training took {running_time_recon} seconds')
 dataloader_constructing1 = copy.deepcopy(dataloader_constructing)
 start_time = time.time()
 fixed_vib = copy.deepcopy(vib)
-fixed_vib_2 = copy.deepcopy(vib) # stored before unlearning
-for epoch in range(1): # args.num_epochs
+fixed_vib_2 = copy.deepcopy(vib) ## this is kept for OUL reconstruction
+for epoch in range(args.num_epochs + 10):
     dataloader_constructing1, fixed_vib = construct_input(dataloader_constructing1, unlearned_vib,
                                                             fixed_vib,
                                                             loss_fn, args,
@@ -1054,12 +1071,14 @@ end_time = time.time()
 running_time = end_time - start_time
 print(f'Constructing data {running_time} seconds')
 
-# args.lr = 0.0001, when change lr, we also need to change iteration rounds
+
+
+# args.lr = 0.0001
 
 vib_for_oubl = copy.deepcopy(vib)
 
 start_time = time.time()
-for epoch in range(args.num_epochs): # args.num_epochs
+for epoch in range(args.num_epochs + 10):
     vib_for_oubl.train()
     vib_for_oubl = vib_train(dataloader_constructing1, vib_for_oubl, loss_fn, reconstruction_function, args, epoch,
                     train_type)
@@ -1079,30 +1098,6 @@ backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on
 acc = eva_vib(vib_for_oubl, test_loader, args, name='on test dataset', epoch=999)
 
 
-
-
-start_time = time.time()
-for epoch in range(args.num_epochs): # args.num_epochs
-    vib_for_oubl.train()
-    vib_for_oubl = vib_train(dataloader_auxiliary, vib_for_oubl, loss_fn, reconstruction_function, args, epoch,
-                    train_type)
-    backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on erased', epoch=999)
-
-
-end_time = time.time()
-
-running_time = end_time - start_time
-print(f'OUL unlearning {running_time} seconds')
-
-# dataloader_target_with_trigger = DataLoader(target_with_tri, batch_size=args.batch_size, shuffle=True)
-
-vib_for_oubl.eval()
-acc_r = eva_vib(vib_for_oubl, dataloader_remaining_after_aux, args, name='on clean remaining dataset', epoch=999)
-backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on erased data', epoch=999)
-acc = eva_vib(vib_for_oubl, test_loader, args, name='on test dataset', epoch=999)
-
-
-
 ##
 unlearned_params = [torch.sign(param.data.view(-1)) for param in unlearned_vib.approximator.parameters() if param.grad is not None]
 vib_params = [torch.sign(param.data.view(-1)) for param in vib_for_oubl.approximator.parameters() if param.grad is not None]
@@ -1119,7 +1114,7 @@ print("forgeability_sim", cos_sim.item())
 forgeability_of_model_diff = []
 #     for name, param in model.named_parameters():
 #         print(name)
-for param1, param2 in zip(unlearned_vib.approximator.parameters(), vib_for_oubl.approximator.parameters()):
+for param1, param2 in zip(unlearned_vib.approximator.parameters(), vib.approximator.parameters()):
     # Calculate the difference (delta) needed to update model1 towards model2
     if param1.grad is not None:
         delta = param2.data.view(-1) - param1.data.view(-1)
@@ -1128,7 +1123,7 @@ print("forgeability", sum(forgeability_of_model_diff)/len(forgeability_of_model_
 
 dim_z = 256
 temp_grad = torch.empty(0, dim_z).float().to(args.device)
-temp_img = torch.empty(0, 3, 32, 32).float().to(args.device)
+temp_img = torch.empty(0, 1, 28, 28).float().to(args.device)
 empty_tensor = torch.Tensor([])
 for step, (x, y) in enumerate(dataloader_erasing_with_tri):
     x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
@@ -1176,7 +1171,7 @@ print(f'reconstruction with unlearning intentions Training took {running_time_re
 
 dim_z = 256
 temp_grad = torch.empty(0, dim_z).float().to(args.device)
-temp_img_cons = torch.empty(0, 3, 32, 32).float().to(args.device)
+temp_img_cons = torch.empty(0, 1, 28, 28).float().to(args.device)
 
 empty_tensor = torch.Tensor([])
 for step, (x, y) in enumerate(dataloader_constructing1):
@@ -1213,8 +1208,56 @@ cons_set_loader = DataLoader(recon_set_cons, batch_size=args.batch_size, shuffle
 start_time = time.time()
 
 reconstructor_er_re = train_reconstructor(copy.deepcopy(fixed_vib_2), cons_set_loader, reconstruction_function, args)
-reconstructor_er_re = evaluate_reconstructor(copy.deepcopy(fixed_vib_2),reconstructor_er_re, er_reconstruction_set_loader, reconstruction_function, args)
+reconstructor_er_re = evaluate_reconstructor(copy.deepcopy(fixed_vib_2), reconstructor_er_re, er_reconstruction_set_loader, reconstruction_function, args)
 end_time = time.time()
 running_time_recon = end_time - start_time
 print(f'reconstruction with unlearning intentions Training took {running_time_recon} seconds')
+
+
+
+
+
+
+# Create a DataLoader to iterate over the concatenated dataset
+data_loader_for_infer_training = DataLoader(concatenated_dataset, batch_size=32, shuffle=True)
+
+infer_model = LinearModel(n_feature=args.dimZ, n_output=1)
+
+infer_model = infer_model.to(device)
+optimizer_infer = torch.optim.Adam(infer_model.parameters(), lr=lr)
+
+criterion = nn.BCEWithLogitsLoss()  # Binary Cross Entropy with Logits Loss
+
+# Initialize AUC metric
+auroc = BinaryAUROC().to(device)
+accuracy = Accuracy(task='binary').to(device)
+
+# Training loop
+num_epochs=40
+for epoch in range(num_epochs):
+    infer_model.train()
+    for x, y in data_loader_for_infer_training:
+        x, y = x.to(device), y.to(device).float()  # Ensure y is of type float for BCEWithLogitsLoss
+        optimizer_infer.zero_grad()
+        #x = x.view(x.size(0), -1)
+        logits_z, logits_y, x_hat, mu, logvar = vib(x, mode='with_reconstruction')  # (B, C* h* w), (B, N, 10)
+        y_pred = infer_model(logits_z).squeeze()  # Get predictions and squeeze to match y shape
+
+        # Compute the loss
+        loss = criterion(y_pred, y)
+        loss.backward()
+        optimizer_infer.step()
+
+        # Update AUC metric
+        auroc.update(y_pred, y.int())
+        accuracy.update((torch.sigmoid(y_pred) > 0.5).int(), y.int())
+
+    # Compute AUC for the epoch
+    epoch_auc = auroc.compute()
+    epoch_accuracy = accuracy.compute()
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item()}, AUC: {epoch_auc.item()}, Accuracy: {epoch_accuracy.item()}')
+
+    # Reset the metric for the next epoch
+    auroc.reset()
+    accuracy.reset()
 

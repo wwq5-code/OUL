@@ -56,6 +56,7 @@ ax1.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 ax1.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery, label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 ax1.set_ylim(600, 700)
+ax1.tick_params(axis='y', labelsize=16)
 ax1.spines['bottom'].set_visible(False)
 ax1.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
@@ -70,6 +71,7 @@ ax2.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 ax2.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery, label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 ax2.set_ylim(0, 5)
+ax2.tick_params(axis='y', labelsize=16)
 ax2.spines['top'].set_visible(False)
 
 # Add diagonal lines to indicate a break in the y-axis

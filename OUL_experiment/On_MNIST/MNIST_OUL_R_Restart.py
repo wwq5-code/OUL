@@ -942,6 +942,7 @@ acc = eva_vib(vib, test_loader, args, name='on test dataset', epoch=999)
 
 # calculate unlearning difference
 
+
 print("prepare unlearning update gradient")
 unlearned_vib = copy.deepcopy(vib)
 start_time = time.time()
@@ -1044,12 +1045,16 @@ end_time = time.time()
 running_time = end_time - start_time
 print(f'Constructing data {running_time} seconds')
 
+# args.lr = 0.0001, when change lr, we also need to change iteration rounds
+
+vib_for_oubl = copy.deepcopy(vib)
+
 start_time = time.time()
 for epoch in range(args.num_epochs + 10):
-    vib.train()
-    vib = vib_train(dataloader_constructing1, vib, loss_fn, reconstruction_function, args, epoch,
+    vib_for_oubl.train()
+    vib_for_oubl = vib_train(dataloader_constructing1, vib_for_oubl, loss_fn, reconstruction_function, args, epoch,
                     train_type)
-    backdoor_acc = eva_vib(vib, dataloader_erasing_with_tri, args, name='on erased', epoch=999)
+    backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on erased', epoch=999)
 
 
 end_time = time.time()
@@ -1057,17 +1062,39 @@ end_time = time.time()
 running_time = end_time - start_time
 print(f'OUL unlearning {running_time} seconds')
 
+
 # dataloader_target_with_trigger = DataLoader(target_with_tri, batch_size=args.batch_size, shuffle=True)
 
-vib.eval()
-acc_r = eva_vib(vib, dataloader_remaining_after_aux, args, name='on clean remaining dataset', epoch=999)
-backdoor_acc = eva_vib(vib, dataloader_erasing_with_tri, args, name='on erased data', epoch=999)
-acc = eva_vib(vib, test_loader, args, name='on test dataset', epoch=999)
+vib_for_oubl.eval()
+acc_r = eva_vib(vib_for_oubl, dataloader_remaining_after_aux, args, name='on clean remaining dataset', epoch=999)
+backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on erased data', epoch=999)
+acc = eva_vib(vib_for_oubl, test_loader, args, name='on test dataset', epoch=999)
+
+
+
+start_time = time.time()
+for epoch in range(args.num_epochs + 10):
+    vib_for_oubl.train()
+    vib_for_oubl = vib_train(dataloader_auxiliary, vib_for_oubl, loss_fn, reconstruction_function, args, epoch,
+                    train_type)
+    backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on erased', epoch=999)
+
+
+end_time = time.time()
+
+running_time = end_time - start_time
+print(f'OUL unlearning2 {running_time} seconds')
+
+vib_for_oubl.eval()
+acc_r = eva_vib(vib_for_oubl, dataloader_remaining_after_aux, args, name='on clean remaining dataset', epoch=999)
+backdoor_acc = eva_vib(vib_for_oubl, dataloader_erasing_with_tri, args, name='on erased data', epoch=999)
+acc = eva_vib(vib_for_oubl, test_loader, args, name='on test dataset', epoch=999)
+
 
 
 ##
 unlearned_params = [torch.sign(param.data.view(-1)) for param in unlearned_vib.approximator.parameters() if param.grad is not None]
-vib_params = [torch.sign(param.data.view(-1)) for param in vib.approximator.parameters() if param.grad is not None]
+vib_params = [torch.sign(param.data.view(-1)) for param in vib_for_oubl.approximator.parameters() if param.grad is not None]
 
 # params_model = [p.data.view(-1) for p in model.parameters()]
 p1 = torch.cat(unlearned_params)
@@ -1081,7 +1108,7 @@ print("forgeability_sim", cos_sim.item())
 forgeability_of_model_diff = []
 #     for name, param in model.named_parameters():
 #         print(name)
-for param1, param2 in zip(unlearned_vib.approximator.parameters(), vib.approximator.parameters()):
+for param1, param2 in zip(unlearned_vib.approximator.parameters(), vib_for_oubl.approximator.parameters()):
     # Calculate the difference (delta) needed to update model1 towards model2
     if param1.grad is not None:
         delta = param2.data.view(-1) - param1.data.view(-1)
@@ -1094,7 +1121,7 @@ temp_img = torch.empty(0, 1, 28, 28).float().to(args.device)
 empty_tensor = torch.Tensor([])
 for step, (x, y) in enumerate(dataloader_erasing_with_tri):
     x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
-    for (name1, param1), (name2, param2) in zip(vib.named_parameters(), fixed_vib_2.named_parameters()):
+    for (name1, param1), (name2, param2) in zip(vib_for_oubl.named_parameters(), fixed_vib_2.named_parameters()):
         # Calculate the difference (delta) needed to update model1 towards model2
         if name1 == 'encoder.linear_head.bias':
 
@@ -1143,7 +1170,7 @@ temp_img_cons = torch.empty(0, 1, 28, 28).float().to(args.device)
 empty_tensor = torch.Tensor([])
 for step, (x, y) in enumerate(dataloader_constructing1):
     x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
-    for (name1, param1), (name2, param2) in zip(vib.named_parameters(), fixed_vib_2.named_parameters()):
+    for (name1, param1), (name2, param2) in zip(vib_for_oubl.named_parameters(), fixed_vib_2.named_parameters()):
         # Calculate the difference (delta) needed to update model1 towards model2
         if name1 == 'encoder.linear_head.bias':
 

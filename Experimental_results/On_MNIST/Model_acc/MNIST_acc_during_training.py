@@ -40,7 +40,7 @@ for i in range(41):
     x.append(i)
 
 plt.style.use('seaborn')
-plt.figure(figsize=(5., 3.8))
+plt.figure(figsize=(5.5, 4.1))
 l_w=5
 m_s=15
 marker_s = 3
@@ -83,7 +83,7 @@ plt.xticks(my_x_ticks, fontsize=20)
 # plt.annotate(r"1e0", xy=(0.1, 1.01), xycoords='axes fraction', xytext=(-10, 10), textcoords='offset points', ha='right', va='center', fontsize=15)
 
 
-# plt.title('(c) Utility Preservation', fontsize=24)
+plt.title('(a) On MNIST', fontsize=20)
 plt.legend(loc='best',fontsize=16)
 plt.tight_layout()
 #plt.title("MNIST")

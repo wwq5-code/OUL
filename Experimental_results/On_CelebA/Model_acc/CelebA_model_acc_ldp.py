@@ -35,7 +35,7 @@ for i in range(len(OUL)):
     vbu_ldp_acc[i] = vbu_ldp_acc[i]*100
 
 plt.style.use('seaborn')
-plt.figure(figsize=(5.5, 5.3))
+plt.figure(figsize=(5.5, 4.1))
 l_w=5
 m_s=15
 marker_s = 3
@@ -65,7 +65,7 @@ plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E1C855',  marker='^', fillstyle
 # plt.grid()
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
-plt.ylabel('Model Accuracy (%)' ,fontsize=24)
+plt.ylabel('Model Accuracy (%)' ,fontsize=20)
 my_y_ticks = np.arange(50., 101, 10)
 plt.yticks(my_y_ticks,fontsize=20)
 plt.xlabel('$\\epsilon$' ,fontsize=20)

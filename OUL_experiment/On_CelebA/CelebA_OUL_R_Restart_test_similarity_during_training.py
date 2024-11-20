@@ -25,7 +25,7 @@ import random
 import time
 from torch.nn.functional import cosine_similarity
 
-
+from torchmetrics.classification import BinaryAUROC, Accuracy
 
 
 def args_parser():
@@ -820,6 +820,20 @@ def add_laplace_noise(tensor, epsilon, sensitivity, args):
 
 
 
+class CustomLabelDataset(Dataset):
+    def __init__(self, dataset, label):
+        self.dataset = dataset
+        self.label = label
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        data, _ = self.dataset[idx]  # Ignore the original label
+        return data, self.label
+
+
+
 seed = 0
 torch.cuda.manual_seed_all(seed)
 torch.manual_seed(seed)
@@ -922,6 +936,20 @@ remaining_set_wo_aux, auxiliary_set = torch.utils.data.random_split(remaining_se
 print(len(remaining_set_wo_aux))
 print('erased size',len(erasing_set))
 # print(len(remaining_set_w_o_twin.dataset.data))
+
+
+
+selected_trained_set, temp_remain = torch.utils.data.random_split(remaining_set_wo_aux, [5000, remaining_set_wo_aux_size -5000])
+selected_test_set, temp_remain = torch.utils.data.random_split(test_set, [5000,  19962 - 5000])
+# Wrap the datasets with custom labels
+labeled_trained_set = CustomLabelDataset(selected_trained_set, 1)
+labeled_test_set = CustomLabelDataset(selected_test_set, 0)
+
+# Concatenate the datasets
+concatenated_dataset = ConcatDataset([labeled_trained_set, labeled_test_set])
+
+
+
 
 # it is the final remaining dataset
 dataloader_remaining_after_aux = DataLoader(remaining_set_wo_aux, batch_size=args.batch_size, shuffle=True)
@@ -1301,3 +1329,52 @@ end_time = time.time()
 running_time_recon = end_time - start_time
 print(f'reconstruction with unlearning intentions Training took {running_time_recon} seconds')
 
+
+
+
+
+
+
+
+# Create a DataLoader to iterate over the concatenated dataset
+data_loader_for_infer_training = DataLoader(concatenated_dataset, batch_size=32, shuffle=True)
+
+infer_model = LinearModel(n_feature=args.dimZ, n_output=1)
+
+infer_model = infer_model.to(device)
+optimizer_infer = torch.optim.Adam(infer_model.parameters(), lr=lr)
+
+criterion = nn.BCEWithLogitsLoss()  # Binary Cross Entropy with Logits Loss
+
+# Initialize AUC metric
+auroc = BinaryAUROC().to(device)
+accuracy = Accuracy(task='binary').to(device)
+
+# Training loop
+num_epochs=40
+for epoch in range(num_epochs):
+    infer_model.train()
+    for x, y in data_loader_for_infer_training:
+        x, y = x.to(device), y.to(device).float()  # Ensure y is of type float for BCEWithLogitsLoss
+        optimizer_infer.zero_grad()
+        #x = x.view(x.size(0), -1)
+        logits_z, logits_y, x_hat, mu, logvar = vib(x, mode='with_reconstruction')  # (B, C* h* w), (B, N, 10)
+        y_pred = infer_model(logits_z).squeeze()  # Get predictions and squeeze to match y shape
+
+        # Compute the loss
+        loss = criterion(y_pred, y)
+        loss.backward()
+        optimizer_infer.step()
+
+        # Update AUC metric
+        auroc.update(y_pred, y.int())
+        accuracy.update((torch.sigmoid(y_pred) > 0.5).int(), y.int())
+
+    # Compute AUC for the epoch
+    epoch_auc = auroc.compute()
+    epoch_accuracy = accuracy.compute()
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item()}, AUC: {epoch_auc.item()}, Accuracy: {epoch_accuracy.item()}')
+
+    # Reset the metric for the next epoch
+    auroc.reset()
+    accuracy.reset()
