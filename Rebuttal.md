@@ -495,7 +495,34 @@ We sincerely appreciate Reviewer Ha5f for providing a detailed summary of our st
 [R8]. Bonawitz, Keith, et al. "Practical secure aggregation for privacy-preserving machine learning." proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security. 2017.  
   
   
+Different unlearning  sample rate (USR) 
+ 
+accuracy of shadow model 0.9455
+accuracy of server's model 0.9874
+ 
+| On MNIST       |  USR  = 1%|  2%  | 3%  |  4% | 5% |  
+| --------         | --------    | -------- | -------- |  -------- |   -------- |  
+| Model Acc. (white-box)      | 98.52%      | 98.55%   |  98.15%  |  98.19%   |  95.43%    |  
+| Model Acc. (black-box)     | 98.26%      |  98.20%  |   98.31% |    98.27%  |  98.54%    |  
+| Backdoor Acc. (white-box)    | 9.67%       | 10.08%   | 9.83%   |  10.42%   |  10.57%        |   
+| Backdoor Acc. (black-box)    | 12.33%       |  9.58%   | 11.67%    |  10.64%    |  11.83%        |   
   
+  
+ 
+ 
+ 
+accuracy of shadow model 0.4257
+accuracy of server's model 0.7880
+ 
+| On CIFAR10       |  USR  = 1%|  2%  | 3%  |  4% | 5% |  
+| --------         | --------    | -------- | -------- |  -------- |     --------    |  
+| Model Acc. (white-box)     | 73.89%      | 74.57%   |  74.50%  |   75.15%  |     75.99%      |  
+| Model Acc. (black-box)     | 76.06%      | 75.98%  |   74.93%   |    75.06%  |    74.68%      |  
+| Backdoor Acc. (white-box)   | 9.40%       | 7.30%   |  7.87%    |    8.70%  |    7.24%        |   
+| Backdoor Acc. (black-box)   | 13.20%       | 10.20%   |  8.40%    |   10.25%   |    8.28%        |   
+  
+ 
+ 
   
   
 **Response to W2 and Q2:** We greatly thank the Reviewer's insightful comment.   
