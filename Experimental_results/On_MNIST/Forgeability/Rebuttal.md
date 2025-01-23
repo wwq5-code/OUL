@@ -500,6 +500,8 @@ Different unlearning  sample rate (USR)
 accuracy of shadow model 0.9455
 accuracy of server's model 0.9874
  
+The **Table R6** of additional experiments on the black-box setting:
+
 | On MNIST       |  USR  = 1%|  2%  | 3%  |  4% | 5% |  
 | --------         | --------    | -------- | -------- |  -------- |   -------- |  
 | Model Acc. (white-box)      | 98.52%      | 98.55%   |  98.15%  |  98.19%   |  95.43%    |  
