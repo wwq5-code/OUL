@@ -1026,7 +1026,7 @@ print(f'reconstruction Training took {running_time_recon} seconds')
 
 
 
-# Update the twin/anti watermarked samples
+
 dataloader_constructing1 = copy.deepcopy(dataloader_constructing)
 start_time = time.time()
 fixed_vib = copy.deepcopy(vib)
@@ -1114,6 +1114,7 @@ for param1, param2 in zip(unlearned_vib.approximator.parameters(), vib_for_oubl.
         delta = param2.data.view(-1) - param1.data.view(-1)
         forgeability_of_model_diff.append(torch.norm(delta, p=2).item())
 print("forgeability", sum(forgeability_of_model_diff)/len(forgeability_of_model_diff))
+
 
 dim_z = 256
 temp_grad = torch.empty(0, dim_z).float().to(args.device)

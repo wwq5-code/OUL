@@ -504,7 +504,7 @@ The **Table R6** of additional experiments on the black-box setting:
 
 | On MNIST       |  USR  = 1%|  2%  | 3%  |  4% | 5% |  
 | --------         | --------    | -------- | -------- |  -------- |   -------- |  
-| Model Acc. (white-box)      | 98.52%      | 98.55%   |  98.15%  |  98.19%   |  95.43%    |  
+| Model Acc. (white-box)      | 98.52%      | 98.55%   |  98.15%  |  98.19%   |  98.53%    |  
 | Model Acc. (black-box)     | 98.26%      |  98.20%  |   98.31% |    98.27%  |  98.54%    |  
 | Backdoor Acc. (white-box)    | 9.67%       | 10.08%   | 9.83%   |  10.42%   |  10.57%        |   
 | Backdoor Acc. (black-box)    | 12.33%       |  9.58%   | 11.67%    |  10.64%    |  11.83%        |   
@@ -614,7 +614,9 @@ Moreover, we assume the ML server does not store the original training data and 
   
   
 **Response to W2 and Q2:**  
-We sincerely appreciate the Reviewers' questions and comments. In the above-provided scenario, our method is applicable and feasible, which can be supported by the results in the paper. To answer the question of whether our method is applicable to different learning rates, we conduct additional experiments, and the results are presented in the following table. The results demonstrate that a larger learning rate can speed the convergence to achieve unlearning, costing less computation and achieving a better unlearning effect (low backdoor accuracy by removing). The tradeoff is that it slightly decreases the model utility at the same time, which is not too much on MNIST but a little worse on CIFAR10.
+We sincerely appreciate the Reviewers' questions and comments. In the above-provided scenario, our method is applicable and feasible, which can be supported by the results in the paper. 
+
+To answer the question of whether our method is applicable to different learning rates, we conduct additional experiments, and the results are presented in the following table. The results demonstrate that a larger learning rate can speed the convergence to achieve unlearning, costing less computation and achieving a better unlearning effect (low backdoor accuracy by removing). The tradeoff is that it slightly decreases the model utility at the same time, which is not too much on MNIST but a little worse on CIFAR10.
   
 The **Table R2** of evaluating learning rate on MNIST and CIFAR10: USR=1%, ASR=1%, and CSR=1%
 

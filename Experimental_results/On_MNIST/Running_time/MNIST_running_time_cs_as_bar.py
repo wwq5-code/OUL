@@ -73,7 +73,7 @@ plt.yticks(my_y_ticks, fontsize=20)
 # ax.set_yticklabels(my_y_ticks,fontsize=15)
 # plt.grid(axis='y')
 # plt.legend(loc='upper left', fontsize=20)
-plt.legend( frameon=True, facecolor='#EAEAF2', loc='best', bbox_to_anchor=(1.0001, -0.15),
+plt.legend( frameon=True, facecolor='#EAEAF2', loc='best', bbox_to_anchor=(1.05001, -0.15),
            ncol=3, fontsize=14.6,)
 
 # mode="expand",  columnspacing=1.0,  borderaxespad=0., framealpha=0.5,handletextpad=0.5
