@@ -7,22 +7,22 @@ epsilon = 3
 beta = 1 / epsilon
 
 
-x=[1, 2, 3, 4, 5, 6]
+x=[1, 2, 3, 4, 5]
 # validation_for_plt =[97,95.8600, 94.9400, 93.5400, 93.2400]
 # attack_for_plt=[0, 0.3524, 0, 0.1762, 0.1762]
 # basic_for_plt=[99.8, 99.8, 99.8, 99.8, 99.8]
 
-labels = ['1', '2', '3', '4', '5', '6']
+labels = ['500', '1000', '1500', '2000', '2500']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.0940, 0.0730, 0.0787, 0.0870, 0.0724, 0.0760]
+OUL = [0.1320, 0.1280, 0.1820, 0.1830, 0.2180]
 
-org_acc = [0.9920, 0.97700, 0.9960, 0.9990, 0.9988, 0.9997]
+org_acc = [0.9920, 0.97700, 0.9960, 0.9990, 0.9988]
 
-vbu_acc = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+vbu_acc = [0.0, 0.0, 0.0, 0.0, 0.0]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
-vbu_ldp_acc = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+vbu_ldp_acc = [0.0970, 0.10, 0.12, 0.11, 0.13]
 
 for i in range(len(OUL)):
     OUL[i] = OUL[i]*100
@@ -44,7 +44,7 @@ plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='fu
 
 
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbLi', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 
@@ -52,18 +52,17 @@ plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 plt.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery,
          label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
-plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E1C855',  marker='^', fillstyle='full', markevery=markevery,
-         label='VBU-LDP',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
-
+plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E07B54',  marker='*', fillstyle='full', markevery=markevery,
+         label='BFU',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s) ##E1C855
 
 
 # plt.grid()
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
-plt.ylabel('Bac. Accuracy (%)' ,fontsize=24)
+plt.ylabel('Backdoor Accuracy (%)' ,fontsize=24)
 my_y_ticks = np.arange(0., 101, 20)
 plt.yticks(my_y_ticks,fontsize=20)
-plt.xlabel('$\\it USR$ (%)', fontsize=20)
+plt.xlabel('$\\it USS$', fontsize=20)
 
 plt.xticks(x, labels, fontsize=20)
 # plt.title('CIFAR10 IID')

@@ -7,20 +7,20 @@ epsilon = 3
 beta = 1 / epsilon
 
 
-x=[1, 2, 3, 4, 5, 6]
+x=[1, 2, 3, 4, 5]
 # validation_for_plt =[97,95.8600, 94.9400, 93.5400, 93.2400]
 # attack_for_plt=[0, 0.3524, 0, 0.1762, 0.1762]
 # basic_for_plt=[99.8, 99.8, 99.8, 99.8, 99.8]
 
-labels = ['0.5', '0.6', '0.7', '0.8', '0.9', '1']
+labels = ['500', '1000', '1500', '2000', '2500']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.990141, 0.98743, 0.9879152, 0.985530, 0.9833045, 0.97707832]
+OUL = [0.91111, 0.865, 0.7958, 0.6991, 0.6673 ]
 
-org_acc = [0.9907, 0.9854, 0.9890, 0.9890, 0.9863, 0.9843]
+org_acc = [0.9907, 0.9854, 0.9890, 0.9890, 0.9863 ]
 
-vbu_acc = [0.3392, 0.8349, 0.4601, 0.4976, 0.2231, 0.3231]
+vbu_acc = [0.3392, 0.8349, 0.4601, 0.4976, 0.2231 ]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
 
 
@@ -38,7 +38,7 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbLi', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
@@ -51,9 +51,9 @@ plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
 plt.ylabel('Unlearning Update Similarity' ,fontsize=24)
-my_y_ticks = np.arange(0.95, 1.001, 0.01)
+my_y_ticks = np.arange(0.5, 1.01, 0.1)
 plt.yticks(my_y_ticks,fontsize=20)
-plt.xlabel('$\\it USR$ (%)' ,fontsize=20)
+plt.xlabel('$\\it USS$' ,fontsize=20)
 
 plt.xticks(x, labels, fontsize=20)
 # plt.title('CIFAR10 IID')

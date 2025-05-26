@@ -18,14 +18,14 @@ fig.subplots_adjust(bottom=0.25,wspace=0.25)
 
 
 
-labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
+labels = [ 'OUbLi', 'SISA', 'VBU', 'BFU', 'HBFU']
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
 # model acc
-unl_on_mnist = [0.9852, 0.9853,0.7869,0.9870, 0.9810 ]
-unl_on_cifar10 = [0.7389, 0.7849, 0.4323, 0.7820, 0.7780 ]
-unl_on_celebA = [0.9574 , 0.9592, 0.9353, 0.9601, 0.9542 ]
+unl_on_mnist = [0.9836, 0.9853,0.7869,0.9870, 0.9810 ]
+unl_on_cifar10 = [0.7654, 0.7849, 0.4323, 0.7820, 0.7780 ]
+unl_on_celebA = [0.9604 , 0.9592, 0.9353, 0.9601, 0.9542 ]
 
 for i in range(len(labels)):
     unl_on_mnist[i] = unl_on_mnist[i]*100
@@ -59,7 +59,7 @@ ax[0].bar(x + width / 8 + width / 8, unl_on_celebA, width=0.21, label='On CelebA
 
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax[0].set_ylabel('Accuracy (%)', fontsize=20)
+ax[0].set_ylabel('Test Accuracy (%)', fontsize=20)
 # ax.set_title('Performance of Different Users n')
 ax[0].set_xticks(x)
 ax[0].set_xticklabels(labels ,fontsize=13)
@@ -99,15 +99,15 @@ ax[0].set_yticks(my_y_ticks )
 
 
 
-labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
+labels = [ 'OUbLi', 'SISA', 'VBU', 'BFU', 'HBFU']
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
 
 # model back acc
-unl_on_mnist = [0.0967, 0.0967, 0.0000, 0.0916, 0.0255]
-unl_on_cifar10 = [0.0940, 0.0760, 0.0000, 0.0970, 0.1804]
-unl_on_celebA = [0.0541 , 0.0531, 0.0664, 0.4192, 0.8193]
+unl_on_mnist = [0.1500, 0.0967, 0.0000, 0.0916, 0.0255]
+unl_on_cifar10 = [0.1320, 0.0760, 0.0000, 0.0970, 0.1804]
+unl_on_celebA = [0.0500 , 0.0531, 0.0664, 0.4192, 0.8193]
 
 
 x = np.arange(len(labels))  # the label locations
@@ -241,7 +241,7 @@ ax[1].set_yticks(my_y_ticks )
 #picture 4
 
 
-labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
+labels = [ 'OUbLi', 'SISA', 'VBU', 'BFU', 'HBFU']
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
@@ -253,7 +253,7 @@ labels = [ 'OUbL', 'SISA', 'VBU', 'BFU', 'HBFU']
 
 unl_on_mnist = [3.920, 11.70, 0.631, 16.03, 18.32]
 unl_on_cifar10 = [6.633, 103, 0.587, 141.26, 149]
-unl_on_celebA = [2.257, 133.74, 0.672, 176.86, 183]
+unl_on_celebA = [1.357, 133.74, 0.672, 176.86, 183]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.7  # the width of the bars

@@ -7,23 +7,24 @@ epsilon = 3
 beta = 1 / epsilon
 
 
-x=[1, 2, 3, 4, 5, 6]
+x=[1, 2, 3, 4, 5]
 # validation_for_plt =[97,95.8600, 94.9400, 93.5400, 93.2400]
 # attack_for_plt=[0, 0.3524, 0, 0.1762, 0.1762]
 # basic_for_plt=[99.8, 99.8, 99.8, 99.8, 99.8]
 
-labels = ['1', '2', '3', '4', '5', '6']
+labels = ['500', '1000', '1500', '2000', '2500']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.846, 0.858, 0.863, 0.879,  0.893,  0.898]
+OUL = [0.834159, 0.8520, 0.8639, 0.86532,  0.875]
 
-org_acc = [0.9999, 0.9999, 0.9999, 0.9999, 0.9999, 0.9999]
+OUL_w = [0.94857, 0.92812, 0.90736, 0.90548, 0.90357]
+org_acc = [0.9999, 0.9999, 0.9999, 0.9999, 0.9999]
 
-vbu_acc = [0.999, 0.999, 0.999, 0.999, 0.999, 0.999]
+vbu_acc = [0.999, 0.999, 0.999, 0.999, 0.999]
 #vbu_acc = [0.8728078, 0.872636, 0.871628, 0.870918, 0.8720292, 0.8716174]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
-vbu_ldp_acc = [0.96881, 0.96881, 0.96881, 0.96881, 0.96881,0.96881]
+vbu_ldp_acc = [0.95857, 0.93312, 0.92236, 0.913848, 0.907757]
 
 for i in range(len(OUL)):
     OUL[i] = OUL[i]*1
@@ -40,12 +41,12 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 
-plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,
-         label='Origin (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+plt.plot(x, OUL_w, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,
+         label='OUbLi (w)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbLi', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
@@ -55,8 +56,8 @@ plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 plt.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery,
          label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
-plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E1C855',  marker='^', fillstyle='full', markevery=markevery,
-         label='VBU-LDP',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E07B54',  marker='*', fillstyle='full', markevery=markevery,
+         label='BFU',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s) ##E1C855
 
 
 # plt.grid()
@@ -65,7 +66,7 @@ leg = plt.legend(fancybox=True, shadow=True)
 plt.ylabel('Reconstruction Similarity' ,fontsize=24)
 my_y_ticks = np.arange(0.80, 1.01, 0.04)
 plt.yticks(my_y_ticks,fontsize=20)
-plt.xlabel('$\\it USR$ (%)' ,fontsize=20)
+plt.xlabel('$\\it USS$' ,fontsize=20)
 
 plt.xticks(x, labels, fontsize=20)
 # plt.title('CIFAR10 IID')
@@ -74,7 +75,7 @@ plt.xticks(x, labels, fontsize=20)
 
 
 # plt.title('(c) Utility Preservation', fontsize=24)
-plt.legend(loc='best',fontsize=20)
+plt.legend(loc=(0.38,0.58),fontsize=18)
 plt.tight_layout()
 #plt.title("MNIST")
 plt.rcParams['figure.figsize'] = (2.0, 1)

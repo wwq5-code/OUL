@@ -2,19 +2,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # user num = 50
-labels = ['1', '2', '3', '4', '5', '6']
+labels = ['500', '1000', '1500', '2000', '2500'  ]
 #unl_fr = [10*10*0.22 *5, 10*10*0.22*5, 10*10*0.22 *5, 10*10*0.22*5 , 10*10*0.22*5  , 10*10*0.22*5  ]
 
 
 
-unl_muv_MNIST = [3.92063, 7.17106  , 9.923 , 13.39719, 16.33203, 19.7248]
-unl_mib_MNIST = [3.92063 , 7.17106 , 9.923 , 13.39719, 16.33203, 19.7248]
+unl_muv_MNIST = [3.92063, 7.17106  , 9.923 , 13.39719, 16.33203 ]
+unl_mib_MNIST = [3.92063 , 7.17106 , 9.923 , 13.39719, 16.33203 ]
 
-unl_muv_CIFAR = [6.663723, 9.9689  , 14.737 , 18.6452 , 24.2110, 27.3431]
-unl_mib_CIFAR = [6.66372 , 9.9689 , 14.737 , 18.6452 , 24.2110, 27.3431]
+unl_muv_CIFAR = [6.663723, 9.9689  , 14.737 , 18.6452 , 24.2110 ]
+unl_mib_CIFAR = [6.66372 , 9.9689 , 14.737 , 18.6452 , 24.2110 ]
 
-unl_muv_CelebA = [2.257, 0.710 +2.2, 0.833441+2.7, 0.80758+3, 0.91+3.3, 1.08+4.01]
-unl_mib_CelebA = [2.257 , 0.710 +2.2, 0.83344+2.7, 0.80758+3, 0.91+3.3, 1.08+4.01]
+unl_muv_CelebA = [1.35, 4, 6.5, 10.8, 14.6 ]
+unl_mib_CelebA = [1.35, 4, 6.5, 10.8, 14.6 ]
 
 
 
@@ -43,12 +43,12 @@ plt.figure()
 
 
 # F7D58B, 9CD1C8, C6B3D3, E58579
-plt.bar(x - width / 4  , unl_mib_MNIST,   width=width/4, label='OUbL on MNIST', color='#C6B3D3', edgecolor='black',  hatch='x')
+plt.bar(x - width / 4  , unl_mib_MNIST,   width=width/4, label='OUbLi on MNIST', color='#C6B3D3', edgecolor='black',  hatch='x')
 
 # F7D58B , 6BB7CA
-plt.bar(x , unl_mib_CIFAR, width=width/4, label='OUbL on CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
+plt.bar(x , unl_mib_CIFAR, width=width/4, label='OUbLi on CIFAR10', color='#F7D58B', edgecolor='black', hatch='*')
 
-plt.bar(x + width / 4 , unl_muv_CelebA, width=width/4, label='OUbL on CelebA', color='#E58579', edgecolor='black', hatch='o')
+plt.bar(x + width / 4 , unl_muv_CelebA, width=width/4, label='OUbLi on CelebA', color='#E58579', edgecolor='black', hatch='o')
 
 
 #plt.bar(x + width / 6 + width / 6 + width/6  , unl_mib_CelebA,   width=width/6, label='MIB CelebA', color='#E58579', edgecolor='black', hatch='\\')
@@ -79,7 +79,7 @@ plt.legend( frameon=True, facecolor='#EAEAF2', loc='best', bbox_to_anchor=(1.050
 # mode="expand",  columnspacing=1.0,  borderaxespad=0., framealpha=0.5,handletextpad=0.5
 #title = 'Methods and Datasets',
 
-plt.xlabel('$\it{CSR}$ and $\it{ASR}$ (%)' ,fontsize=20)
+plt.xlabel('$\it{ASS}$ and $\it{CSS}$' ,fontsize=20)
 # ax.bar_label(rects1, padding=1)
 # ax.bar_label(rects2, padding=3)
 # ax.bar_label(rects3, padding=3)

@@ -7,22 +7,24 @@ epsilon = 3
 beta = 1 / epsilon
 
 
-x=[1, 2, 3, 4, 5, 6]
+x=[1, 2, 3, 4, 5]
 # validation_for_plt =[97,95.8600, 94.9400, 93.5400, 93.2400]
 # attack_for_plt=[0, 0.3524, 0, 0.1762, 0.1762]
 # basic_for_plt=[99.8, 99.8, 99.8, 99.8, 99.8]
 
-labels = ['1', '2', '3', '4', '5', '6']
+labels = ['500', '1000', '1500', '2000', '2500']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
 # data construction time
-OUL = [6.633, 7.373, 8.26683, 9.377835, 10.3865, 11.41485]
+OUL = [6.633, 7.373, 8.26683, 9.377835, 10.3865]
 
-org_acc = [491.932, 490.468, 490.468, 490.7103, 490.7103, 490.7103]
+org_acc = [491.932, 490.468, 490.468, 490.7103, 490.7103 ]
 
-vbu_acc = [0.5862, 0.63, 0.67, 0.70, 0.73, 0.74]
+vbu_acc = [0.5862, 0.63, 0.67, 0.70, 0.73]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
+
+vbu_ldp_acc = [143, 143, 141, 142, 140]
 
 
 for i in range(len(OUL)):
@@ -43,12 +45,18 @@ markevery=1
 plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
-plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery, label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery, label='OUbLi', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 
 
 plt.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery, label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+
+
+plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E07B54',  marker='*', fillstyle='full', markevery=markevery,
+         label='BFU',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s) ##E1C855
+
+
 
 # plt.grid()
 leg = plt.legend(fancybox=True, shadow=True)
@@ -56,7 +64,7 @@ leg = plt.legend(fancybox=True, shadow=True)
 plt.ylabel('Running Time (s)', fontsize=24)
 my_y_ticks = np.arange(0., 500.94, 100.)
 plt.yticks(my_y_ticks,fontsize=20)
-plt.xlabel('$\\it USR$ (%)' ,fontsize=20)
+plt.xlabel('$\\it USS$' ,fontsize=20)
 
 plt.xticks(x, labels, fontsize=20)
 # plt.title('CIFAR10 IID')

@@ -52,7 +52,7 @@ plt.plot(x, clean_print, linestyle='-', color='#E07B54',  fillstyle='full', mark
 
 
 plt.plot(x, out_print, linestyle='-', color='#797BB7',  fillstyle='full', markevery=markevery,
-         label='Synthesized Data (OUbL)', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='Synthesized Data (OUbLi)', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 # marker='o',  marker='*',

@@ -7,16 +7,16 @@ epsilon = 3
 beta = 1 / epsilon
 
 
-x=[1, 2, 3, 4, 5, 6]
+x=[1, 2, 3, 4, 5]
 # validation_for_plt =[97,95.8600, 94.9400, 93.5400, 93.2400]
 # attack_for_plt=[0, 0.3524, 0, 0.1762, 0.1762]
 # basic_for_plt=[99.8, 99.8, 99.8, 99.8, 99.8]
 
-labels = ['1', '2', '3', '4', '5', '6']
+labels = ['1', '2', '3', '4', '5']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.942093, 0.944136, 0.946731, 0.94769657, 0.94818, 0.948180]
+OUL = [0.912385, 0.9270, 0.90894, 0.9198, 0.9314]
 
 org_acc = [0.94293, 0.944136, 0.947731, 0.94769657, 0.94818, 0.948180]
 
@@ -38,7 +38,7 @@ markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbLi', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
@@ -51,7 +51,7 @@ plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', m
 leg = plt.legend(fancybox=True, shadow=True)
 # plt.xlabel('Malicious Client Ratio (%)' ,fontsize=16)
 plt.ylabel('Unlearning Update Similarity' ,fontsize=24)
-my_y_ticks = np.arange(0.94, 0.96, 0.004)
+my_y_ticks = np.arange(0.90, 0.96, 0.01)
 plt.yticks(my_y_ticks,fontsize=20)
 plt.xlabel('$\it{CSR}$ and $\it{ASR}$ (%)',fontsize=20)
 

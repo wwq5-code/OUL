@@ -252,9 +252,7 @@ class VIB(nn.Module):
         B, dimZ = logits_z.shape
         logits_z = logits_z.reshape((B, -1))
         output_x = self.decoder(logits_z)
-        x_v = x.view(x.size(0), -1)
-        x2 = F.relu(x_v - output_x)
-        return torch.sigmoid(self.fc3(x2))
+        return torch.sigmoid(self.fc3(output_x))
 
     def cifar_recon(self, logits_z):
         # B, c, h, w = logits_z.shape
@@ -363,7 +361,7 @@ def vib_train(dataset, model, loss_fn, reconstruction_function, args, epoch, tra
             x_hat_cpu = x_hat_cpu.clamp(0, 1)
             x_hat_cpu = x_hat_cpu.view(x_hat_cpu.size(0), 1, 28, 28)
             grid = torchvision.utils.make_grid(x_hat_cpu, nrow=4)
-            plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
+            # plt.imshow(np.transpose(grid, (1, 2, 0)))  # 交换维度，从GBR换成RGB
             # plt.show()
             # print("print x grad")
             # print(input_gradient)
@@ -443,29 +441,66 @@ def prepare_update_direction(unlearned_vib, model):
     return update_deltas_direction
 
 
+
+def prepare_update_direction_dp(unlearned_vib, model, args):
+    # hyper‑parameters ----------------------------------------------------------
+    C = 1.0  # L2‑clipping bound
+    eps_step = args.eps  # per‑step ε  (choose with total ε in mind)
+    delta = 1e-6  # target δ
+    sigma = C * math.sqrt(2 * math.log(1.25 / delta)) / eps_step  # noise std
+    # --------------------------------------------------------------------------
+
+    update_deltas_direction = []
+
+    for p1, p2 in zip(unlearned_vib.approximator.parameters(),
+                      model       .approximator.parameters()):
+
+        if p1.grad is None:          # skip frozen layers
+            continue
+
+        # 1)  raw direction -----------------------------------------------
+        delta = (p2.data - p1.data).view(-1)       # flatten
+
+
+        # 2)  L2‑clip ------------------------------------------------------
+        l2_norm = delta.norm(2)
+        if l2_norm > C:
+            delta = delta * (C / l2_norm)
+
+        # 3)  add Gaussian noise ------------------------------------------
+        noise = torch.randn_like(delta) * (sigma)
+        # print(noise)
+        delta_dp = delta + noise #add_laplace_noise(delta, eps_step, 1 , args) #
+
+        grad_direction = torch.sign(delta_dp)  # {‑1,0,1} per element
+        update_deltas_direction.append(grad_direction)
+
+    # 4) (optional) record privacy loss in a moments accountant here ------
+    # accountant.accumulate(sigma, batch_size=1, total_records=1)
+
+    return update_deltas_direction
+
 # here the dataset is the watermarking dataset, also we need a dataset of the target dataset as target
-def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
+def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch, noise_flag):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     temp_img = torch.empty(0, 1, 28, 28).float().to(args.device)
     temp_label = torch.empty(0).long().to(args.device)
+    patch_slice = (slice(-26, -2), slice(-26, -2))
 
     for step, (x, y) in enumerate(dataset):
         x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
         # x = x.view(x.size(0), -1)
         b_s, _, width, height = x.shape
         init_random_x = torch.zeros_like(x).to(args.device)
-        init_random_x[:, :, width - 3, height - 3] = args.laplace_scale/4
-        init_random_x[:, :, width - 3, height - 4] = args.laplace_scale/4
-        init_random_x[:, :, width - 4, height - 3] = args.laplace_scale/4
-        init_random_x[:, :, width - 4, height - 4] = args.laplace_scale/4
-        random_patch = init_random_x[:, :, -4:-2, -4:-2]
+        init_random_x[:, :, patch_slice[0], patch_slice[1]] = 0
+        random_patch = init_random_x[:, :, patch_slice[0], patch_slice[1]]
         break
 
     for step, (x, y) in enumerate(dataset):
 
-        update_deltas_direction = prepare_update_direction(unlearned_vib, model)
+        update_deltas_direction = prepare_update_direction_dp(unlearned_vib, model, args)#prepare_update_direction(unlearned_vib, model)
         x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
         # x = x.view(x.size(0), -1)
         b_s, _, width, height = x.shape
@@ -476,8 +511,8 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
         random_patch.requires_grad = True
         optimizer_x = torch.optim.Adam([random_patch], 0.1)
         x2 = x
-        x2[:, :, -4:-2, -4:-2] = x2[:, :, -4:-2, -4:-2] + random_patch
-        x2 = x2.clamp(0, 1)
+        x2[:, :, patch_slice[0], patch_slice[1]] = x2[:, :, patch_slice[0], patch_slice[1]] + random_patch
+        #x2[:, :, patch_slice[0], patch_slice[1]] = x2[:, :, patch_slice[0], patch_slice[1]].clamp(0, 1)
         logits_z, logits_y, x_hat, mu, logvar = model(x2, mode='with_reconstruction')  # (B, C* h* w), (B, N, 10)
 
         KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar).cuda()
@@ -511,14 +546,25 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
         # torch.nn.utils.clip_grad_norm_(model.parameters(), 5, norm_type=2.0, error_if_nonfinite=False)
         # Check if gradients exist for x
         input_gradient = random_patch.grad.detach()
+        patch = x[:, :, patch_slice[0], patch_slice[1]]
+        update = random_patch.detach()  # no grad through random
+        upd_sum = update.sum(dim=(-1, -2), keepdim=True)  # (B,C,1,1)
+        max_total = 4.0
+        # scaling factor ≤ 1.0 ; add a tiny eps to avoid 0‑division
+        scale = torch.clamp(max_total / (upd_sum + 1e-12), max=1.0)
+        bounded_upd = update * scale  # each (B,C) patch increment ≤ 4
+        new_patch = (patch + bounded_upd).clamp_(0.0, 1.0)
 
-        l1_norm = torch.norm(input_gradient, p=1)
-        epsilon = args.ep_distance
-        piece_v = (epsilon - l1_norm) / (b_s * 4)
-        # input_gradient = input_gradient / l1_norm * 16
-        x[:, :, -4:-2, -4:-2] = x[:, :, -4:-2, -4:-2] + random_patch.detach()
-        updated_x = x.clamp(0, 1) #- input_gradient # if we optimizer step, we don't need subtract
-        input_gradient = input_gradient
+        x[:, :, patch_slice[0], patch_slice[1]] = new_patch
+        if noise_flag == 1:
+            updated_x = add_laplace_noise(x, args.eps, 0.5, args)  # - input_gradient # if we optimizer step, we don't need subtract
+        else:
+            updated_x = x  # - input_gradient # if we optimizer step, we don't need subtract
+
+
+
+
+        #input_gradient = input_gradient
         temp_img = torch.cat([temp_img, updated_x.detach()], dim=0)
         temp_label = torch.cat([temp_label, y.detach()], dim=0)
         # optimizer.step()
@@ -530,7 +576,7 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
             'loss1': loss1.item(),
             'similarity_loss': similarity_loss.item(),
             'KLD_mean': KLD_mean.item(),
-            'l1_norm': l1_norm.item(),
+            # 'l1_norm': l1_norm.item(),
             # 'BCE': BCE.item(),
             'H(p,q)': H_p_q_1.item(),
             # '1-JS(p,q)': JS_p_q,
@@ -564,6 +610,7 @@ def construct_input(dataset, unlearned_vib, model, loss_fn, args, epoch):
     d = Data.TensorDataset(temp_img, temp_label)
     d_loader = DataLoader(d, batch_size=args.batch_size, shuffle=True)
     return d_loader, model
+
 
 
 @torch.no_grad()
@@ -622,6 +669,157 @@ def eva_vib_target(vib, dataloader_erase, args, name='test', epoch=999):
     print(f'epoch {epoch}, {name} accuracy:  {acc:.4f}, total_num:{num_total}')
     return acc
 
+def sample_first_n(dl: DataLoader, n: int, device):
+    """Return two tensors (x , y) containing the first n samples of `dl`."""
+    xs, ys = [], []
+    for x, y in dl:
+        take = min(n - len(xs), x.size(0))
+        xs.append(x[:take].to(device))
+        ys.append(y[:take].to(device))
+        if len(xs) >= n:                 # collected n samples
+            break
+    return torch.cat(xs, dim=0), torch.cat(ys, dim=0)
+
+
+def train_membership_infer(vib_origin, vib_unl, unlearned_dataloader, remaning_dataloader, loss_fn, args):
+    # init reconsturctor
+    # reconstructor = LinearModel(n_feature=40, n_output=28 * 28).to(args.device)
+    vib_unl.trainable = False
+    vib_origin.trainable = False
+
+
+
+    N_SAMPLES = args.construct_size
+
+    x_unl, y_unl = sample_first_n(unlearned_dataloader, N_SAMPLES, args.device)
+    x_rem, y_rem = sample_first_n(remaning_dataloader, N_SAMPLES, args.device)
+
+    unl_subset = TensorDataset(x_unl, y_unl)
+    rem_subset = TensorDataset(x_rem, y_rem)
+
+    unl_loader = DataLoader(unl_subset, batch_size=args.batch_size, shuffle=True)
+    rem_loader = DataLoader(rem_subset, batch_size=args.batch_size, shuffle=True)
+
+
+    model_output_for_infer = torch.empty(0, 28 * 28).float().to(args.device)
+    label_for_infer = torch.empty(0).long().to(args.device)
+    for x, y in unl_loader:
+        x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
+
+        _, _, x_hat_o, _, _ = vib_origin(x, mode='with_reconstruction')
+
+        _, _, x_hat_inl, _, _ = vib_unl(x, mode='with_reconstruction')
+
+        x_for_infer = x_hat_o - x_hat_inl
+
+        model_output_for_infer = torch.cat([model_output_for_infer, x_for_infer.detach()], dim=0)
+        B = x.size(0)
+        new_labels = torch.full((B,),
+                                1,
+                                dtype=label_for_infer.dtype,
+                                device=label_for_infer.device)
+        label_for_infer = torch.cat([label_for_infer, new_labels], dim=0)
+
+    for x, y in rem_loader:
+        x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
+
+        _, _, x_hat_o, _, _ = vib_origin(x, mode='with_reconstruction')
+
+        _, _, x_hat_inl, _, _ = vib_unl(x, mode='with_reconstruction')
+
+        x_for_infer = x_hat_o - x_hat_inl
+
+        model_output_for_infer = torch.cat([model_output_for_infer, x_for_infer.detach()], dim=0)
+        B = x.size(0)
+        new_labels = torch.full((B,),
+                                0,
+                                dtype=label_for_infer.dtype,
+                                device=label_for_infer.device)
+        label_for_infer = torch.cat([label_for_infer, new_labels], dim=0)
+
+
+    infer_model = LinearModel(n_feature=28*28, n_output=2)
+    infer_model = infer_model.to(args.device)
+    optimizer_infer = torch.optim.Adam(infer_model.parameters(), lr=lr)
+
+    d = Data.TensorDataset(model_output_for_infer, label_for_infer)
+    # print(temp_label)
+    d_loader = DataLoader(d, batch_size=args.batch_size, shuffle=True)
+
+    ## training epochs
+    total_training_samples = 60000*0.1
+    erased_samples = args.erased_local_r
+    epochs= int(total_training_samples/erased_samples)
+
+
+    for epoch in range(10):
+
+        loss_list = []
+        for infer_iput, label in d_loader:
+            infer_iput, label = infer_iput.to(args.device), label.to(args.device)  # (B, C, H, W), (B, 10)
+
+            output = infer_model(infer_iput)
+
+            loss = loss_fn(output, label)
+
+            optimizer_infer.zero_grad()
+            loss.backward()
+            optimizer_infer.step()
+
+            loss_list.append(loss.item())
+
+        print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
+
+
+    infer_model.eval()
+
+    num_total = 0
+    num_correct = 0
+    for batch_idx, (x, y) in enumerate(d_loader):
+        x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
+        # x = x.view(x.size(0), -1)
+        # print(x.shape)
+        output = infer_model(x)  # (B, C* h* w), (B, N, 10)
+
+
+
+        if y.ndim == 2:
+            y = y.argmax(dim=1)
+        num_correct += (output.argmax(dim=1) == y).sum().item()
+        num_total += len(x)
+
+    acc = num_correct / num_total
+    acc = round(acc, 5)
+    print(f'epoch {epoch}, MIA infer accuracy:  {acc:.4f}, total_num:{num_total}')
+
+
+    return infer_model, d_loader
+
+def infer_evaluate(infer_model, d_loader):
+    infer_model.eval()
+
+    num_total = 0
+    num_correct = 0
+    for batch_idx, (x, y) in enumerate(d_loader):
+        x, y = x.to(args.device), y.to(args.device)  # (B, C, H, W), (B, 10)
+        # x = x.view(x.size(0), -1)
+        # print(x.shape)
+        output = infer_model(x)  # (B, C* h* w), (B, N, 10)
+
+
+
+        if y.ndim == 2:
+            y = y.argmax(dim=1)
+        num_correct += (output.argmax(dim=1) == y).sum().item()
+        num_total += len(x)
+
+    acc = num_correct / num_total
+    acc = round(acc, 5)
+    print(f'epoch {epoch}, MIA infer accuracy:  {acc:.4f}, total_num:{num_total}')
+
+    return acc
+
+
 
 def train_reconstructor(vib, train_loader, reconstruction_function, args):
     # init reconsturctor
@@ -636,7 +834,7 @@ def train_reconstructor(vib, train_loader, reconstruction_function, args):
 
     ## training epochs
     total_training_samples = 60000*0.2
-    erased_samples = 60000*args.erased_local_r
+    erased_samples = args.erased_local_r
     epochs= int(total_training_samples/erased_samples)
 
 
@@ -673,18 +871,18 @@ def evaluate_reconstructor(vib, reconstructor, train_loader, reconstruction_func
     vib.decoder.trainable = False
     vib.fc3.trainable = False
 
+    vib.eval()
+    reconstructor.eval()
 
-    optimizer_recon = torch.optim.Adam(reconstructor.parameters(), lr=args.lr)
-    reconstructor.train()
-    epochs = 1
 
     ## training epochs
     total_training_samples = 60000*0.2
-    erased_samples = 60000*args.erased_local_r
+    erased_samples = args.erased_local_r
     epochs= int(total_training_samples/erased_samples)
 
-
-    for epoch in range(1):
+    epochs = 1
+    sim_list = []
+    for epoch in range(epochs):
         similarity_term = []
         loss_list = []
         for grad, img in train_loader:
@@ -697,17 +895,62 @@ def evaluate_reconstructor(vib, reconstructor, train_loader, reconstruction_func
             img = img.view(img.size(0), -1)  # Flatten the images
             loss = reconstruction_function(x_hat, img)
 
-            optimizer_recon.zero_grad()
-            loss.backward()
-            optimizer_recon.step()
+
             cos_sim = cosine_similarity(x_hat.view(1, -1), img.view(1, -1))
             similarity_term.append(cos_sim.item())
             loss_list.append(loss.item())
-            break  ## one batch for test is ok
+            # break
 
         print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
         print("constructed learning cosine similarity:", sum(similarity_term)/len(similarity_term), "average loss:", sum(loss_list)/len(loss_list))
+        sim_list.append(sum(similarity_term)/len(similarity_term))
+    print("average cosine similarity:", sum(sim_list)/len(sim_list))
     return reconstructor
+
+
+
+
+def evaluate_reconstructor_without_unl_intention(vib, reconstructor, cons_set_loader, er_reconstruction_set_loader, reconstruction_function, args):
+    # init reconsturctor
+    # reconstructor = LinearModel(n_feature=40, n_output=28 * 28).to(args.device)
+    vib.decoder.trainable = False
+    vib.fc3.trainable = False
+
+    vib.eval()
+    reconstructor.eval()
+
+
+    ## training epochs
+    total_training_samples = 60000*0.2
+    erased_samples = args.erased_local_r
+    epochs= int(total_training_samples/erased_samples)
+
+    epochs = 1
+    sim_list = []
+    for epoch in range(epochs):
+        similarity_term = []
+        loss_list = []
+        for (grad, _), (_, img) in zip(cons_set_loader, er_reconstruction_set_loader):
+            grad, img = grad.to(args.device), img.to(args.device)  # (B, C, H, W), (B, 10)
+            grad = grad.view(grad.size(0), 1, 16, 16)
+            # img = img.view(img.size(0), -1)  # Flatten the images
+            output = reconstructor(grad)
+            # output = output.view(output.size(0), 3, 32, 32)
+            x_hat = vib.reconstruction(output, img)
+            img = img.view(img.size(0), -1)  # Flatten the images
+            loss = reconstruction_function(x_hat, img)
+
+            cos_sim = cosine_similarity(x_hat.view(1, -1), img.view(1, -1))
+            similarity_term.append(cos_sim.item())
+            loss_list.append(loss.item())
+            # break
+
+        print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
+        print("constructed learning cosine similarity:", sum(similarity_term)/len(similarity_term), "average loss:", sum(loss_list)/len(loss_list))
+        sim_list.append(sum(similarity_term) / len(similarity_term))
+    print("average cosine similarity:", sum(sim_list) / len(sim_list))
+    return reconstructor
+
 
 # Function to add Laplace noise
 def add_laplace_noise(tensor, epsilon, sensitivity, args):
@@ -729,6 +972,24 @@ def add_laplace_noise(tensor, epsilon, sensitivity, args):
     noisy_tensor = tensor + noise
 
     return noisy_tensor
+
+
+
+# Create a dataset wrapper to repeat dataset3
+class RepeatedDataset(Dataset):
+    def __init__(self, base_dataset, target_size):
+        self.base_dataset = base_dataset
+        self.target_size = target_size
+        self.base_size = len(base_dataset)
+
+    def __len__(self):
+        return self.target_size
+
+    def __getitem__(self, idx):
+        # Map idx to the base dataset using modulo
+        return self.base_dataset[idx % self.base_size]
+
+# Construct the repeated dataset
 
 
 
@@ -759,16 +1020,17 @@ args.unlearn_learning_rate = 0.1
 args.ep_distance = 20
 args.dimZ = 128  # 40 # 2
 args.batch_size = 16
-args.erased_local_r = 0.01 # 0.000017 #0.01  # when ratio value is 0.000017, the sample is 1. 0.002 # the erased data ratio
-args.construct_size = 0.01
-args.auxiliary_size = 0.01
+args.erased_local_r = 500 # 0.000017 #0.01  # when ratio value is 0.000017, the sample is 1. 0.002 # the erased data ratio
+args.construct_size = 500
+args.auxiliary_size = 500
+args.eps = 4
 args.train_type = "MULTI"
 args.kld_to_org = 1
 args.unlearn_bce = 0.3
 args.self_sharing_rate = 0.8
-args.laplace_scale = 0.8
-args.laplace_epsilon = 10 ## when 10 means
-args.num_epochs_recon = 50 # 50
+args.laplace_scale = 1
+args.laplace_epsilon = 10
+args.num_epochs_recon = 50
 
 ### 1: 0.000017, 20: 0.00034, 40: 0.00067, 60: 0.001, 80: 0.00134, 100: 0.00167
 # print('args.beta', args.beta, 'args.lr', args.lr)
@@ -803,22 +1065,28 @@ test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, nu
 full_size = len(train_set)
 
 # the erasing data
-erasing_size = int(full_size * args.erased_local_r)
+erasing_size = args.erased_local_r
 remaining_size = full_size - erasing_size
 remaining_set, erasing_set = torch.utils.data.random_split(train_set,
                                                            [remaining_size, erasing_size])
 
 # the construction data size
-construct_size = int(full_size * args.construct_size)
+construct_size = args.construct_size
 remaining_set_w_o_cons_size = remaining_size - construct_size
 remaining_set_w_o_cons, construct_set = torch.utils.data.random_split(remaining_set,
                                                                       [remaining_set_w_o_cons_size, construct_size])
 
-auxiliary_size = int(full_size * args.auxiliary_size)
+auxiliary_size = args.auxiliary_size
 remaining_set_wo_aux_size = remaining_set_w_o_cons_size - auxiliary_size
 remaining_set_wo_aux, auxiliary_set = torch.utils.data.random_split(remaining_set_w_o_cons,
                                                                     [remaining_set_wo_aux_size, auxiliary_size])
+
+remaining_set_wo_aux_size2 = remaining_set_wo_aux_size - erasing_size
+_, for_infer_set_in = torch.utils.data.random_split(remaining_set_wo_aux,
+                                                                    [remaining_set_wo_aux_size2, erasing_size])
 # this is the final remaining dataset, without the erasing dataset, and the auxiliary dataset
+
+
 print(len(remaining_set_wo_aux))
 print('erased size', len(erasing_set))
 # print(len(remaining_set_w_o_twin.dataset.data))
@@ -829,6 +1097,7 @@ dataloader_remaining_after_aux = DataLoader(remaining_set_wo_aux, batch_size=arg
 # it is the erasing dataset
 dataloader_erasing = DataLoader(erasing_set, batch_size=args.batch_size, shuffle=True)
 
+dataloader_for_infer_in = DataLoader(for_infer_set_in, batch_size=args.batch_size, shuffle=True)
 # it is the constructing dataset
 dataloader_constructing = DataLoader(construct_set, batch_size=args.batch_size, shuffle=True)
 
@@ -848,7 +1117,7 @@ combined_loader = DataLoader(combined_dataset, batch_size=args.batch_size, shuff
 ## determine target, we need to change the target data's label, we also need to keep the original label, do we need?
 
 ## add to one class
-add_backdoor = 1  # =1 add backdoor , !=1 not add
+add_backdoor = 0 #1  # =1 add backdoor , !=1 not add
 # reshaped_data = data_reshape_to_np(erasing_subset, dataname=args.dataset)
 # only set one sample as the watermark target, or multi samples?
 # target_samples_size = erasing_size  # erasing_size  # len(erasing_subset.data)
@@ -889,6 +1158,9 @@ if args.dataset == "MNIST":
     x = x.view(x.size(0), 1, 28, 28)
 elif args.dataset == "CIFAR10":
     x = x.view(1, 3, 32, 32)
+elif args.dataset == "CelebA":
+    x = x.view(1, 3, 32, 32)
+
 print(x)
 grid = torchvision.utils.make_grid(x, nrow=1)
 # grid = torchvision.utils.make_grid(x, nrow=1, cmap="gray")
@@ -940,6 +1212,7 @@ acc_r = eva_vib(vib, dataloader_remaining_after_aux, args, name='on clean remain
 backdoor_acc = eva_vib(vib, dataloader_erasing_with_tri, args, name='on backdoored erasing dataset', epoch=999)
 acc = eva_vib(vib, test_loader, args, name='on test dataset', epoch=999)
 
+
 # calculate unlearning difference
 
 
@@ -956,17 +1229,6 @@ acc_r = eva_vib(unlearned_vib, dataloader_remaining_after_aux, args, name='unlea
 backdoor_acc = eva_vib(unlearned_vib, dataloader_erasing_with_tri, args, name='unlearned model on erased data', epoch=999)
 acc = eva_vib(unlearned_vib, test_loader, args, name='unlearned model on test dataset', epoch=999)
 
-print("prepare unlearning with DP noise")
-unlearned_vib_with_noise = copy.deepcopy(vib)
-start_time = time.time()
-unlearned_vib_with_noise = prepare_unl(dataloader_erasing_with_tri, unlearned_vib, loss_fn, args, "noise")
-end_time = time.time()
-running_time = end_time - start_time
-print(f'unlearning with dp {running_time} seconds')
-unlearned_vib_with_noise.eval()
-acc_r = eva_vib(unlearned_vib_with_noise, dataloader_remaining_after_aux, args, name='unlearned model on clean remaining dataset', epoch=999)
-backdoor_acc = eva_vib(unlearned_vib_with_noise, dataloader_erasing_with_tri, args, name='unlearned model on erased data', epoch=999)
-acc = eva_vib(unlearned_vib_with_noise, test_loader, args, name='unlearned model on test dataset', epoch=999)
 
 update_deltas_direction = []
 #     for name, param in model.named_parameters():
@@ -997,7 +1259,7 @@ for step, (x, y) in enumerate(dataloader_erasing_with_tri):
             B, C, H, W = x.size()
 
             mean = 1  # Mean of the distribution
-            std_dev = 0.4  # Standard deviation of the distribution
+            std_dev = 0.2  # Standard deviation of the distribution
 
             # Generate Gaussian noise
             random_tensor = torch.randn(B, dim_z) * std_dev + mean
@@ -1019,7 +1281,11 @@ er_reconstruction_set_loader = DataLoader(er_reconstruction_set, batch_size=args
 
 start_time = time.time()
 
+infer_er, infer_loader = train_membership_infer(copy.deepcopy(vib), copy.deepcopy(unlearned_vib), dataloader_erasing_with_tri, dataloader_for_infer_in, loss_fn, args)
+
 reconstructor_er_re = train_reconstructor(copy.deepcopy(vib), er_reconstruction_set_loader, reconstruction_function, args)
+reconstructor_er_re = evaluate_reconstructor(copy.deepcopy(vib), reconstructor_er_re, er_reconstruction_set_loader, reconstruction_function, args)
+
 end_time = time.time()
 running_time_recon = end_time - start_time
 print(f'reconstruction Training took {running_time_recon} seconds')

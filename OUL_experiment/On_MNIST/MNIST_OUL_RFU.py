@@ -252,9 +252,7 @@ class VIB(nn.Module):
         B, dimZ = logits_z.shape
         logits_z = logits_z.reshape((B, -1))
         output_x = self.decoder(logits_z)
-        x_v = x.view(x.size(0), -1)
-        x2 = F.relu(x_v - output_x)
-        return torch.sigmoid(self.fc3(x2))
+        return torch.sigmoid(self.fc3(output_x))
 
     def cifar_recon(self, logits_z):
         # B, c, h, w = logits_z.shape

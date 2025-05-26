@@ -16,22 +16,22 @@ labels = ['2', '4', '6', '8', '10']
 # unl_org = [97.77, 97.55, 97.35, 97.29, 97.21, 97.21]
 
 # unl_hess_r = [96.6, 96.66, 96.04, 95.94, 95.85, 97.21]
-OUL = [0.818 , 0.818, 0.818, 0.818, 0.818]
+OUL = [0.54805 , 0.550679, 0.5509125, 0.552790, 0.551179]
 
-org_acc = [0.9999, 0.9999, 0.9999, 0.9999, 0.9999]
+OUbLi_w = [0.79345, 0.796361, 0.797808, 0.796146, 0.796784]
 
 bfu_acc = [0.874, 0.874, 0.874, 0.874, 0.874]
 
 vbu_acc = [0.9999, 0.9999, 0.9999, 0.9999,0.9999]
 # unl_ss_wo = [94.32, 94.53, 94.78, 93.38, 94.04, 97.21]
-vbu_ldp_acc = [0.43458, 0.69386, 0.82215, 0.88739, 0.9233]
+bfu_ldp_acc = [0.78531, 0.78531, 0.78531, 0.78531, 0.78531]
 
 
 for i in range(len(OUL)):
     OUL[i] = OUL[i]*1
-    org_acc[i] = org_acc[i]*1
+    OUbLi_w[i] = OUbLi_w[i]*1
     vbu_acc[i] = vbu_acc[i]*1
-    vbu_ldp_acc[i] = vbu_ldp_acc[i]*1
+    bfu_ldp_acc[i] = bfu_ldp_acc[i]*1
 
 plt.style.use('seaborn')
 plt.figure(figsize=(5.5, 4.1))
@@ -41,27 +41,26 @@ marker_s = 3
 markevery=1
 #plt.figure(figsize=(8, 5.3))
 #plt.plot(x, unl_fr, color='blue', marker='^', label='Retrain',linewidth=l_w, markersize=m_s)
-plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,
-         label='Origin (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+
+#plt.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery, label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+
+
+plt.plot(x, OUbLi_w, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery,
+         label='OUbLi (w)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 plt.plot(x, OUL, linestyle='-', color='#797BB7', marker='o', fillstyle='full', markevery=markevery,
-         label='OUbL', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+         label='OUbLi', linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 #plt.plot(x, unl_ss_w, color='g',  marker='*',  label='PriMU$_{w}$',linewidth=l_w, markersize=m_s)
 #plt.plot(x, org_acc, linestyle='--', color='#9BC985',  marker='s', fillstyle='full', markevery=markevery, label='Origin',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
-
 
 
 plt.plot(x, bfu_acc, linestyle=':', color='#E07B54',  marker='*', fillstyle='full', markevery=markevery,
          label='BFU',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
-plt.plot(x, vbu_acc, linestyle='-.', color='#2A5522',  marker='D', fillstyle='full', markevery=markevery,
-         label='VBU (No Pri.)',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
-
-plt.plot(x, vbu_ldp_acc, linestyle='-.', color='#E1C855',  marker='^', fillstyle='full', markevery=markevery,
-         label='VBU-LDP',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
+# plt.plot(x, bfu_ldp_acc, linestyle='-.', color='#E1C855',  marker='^', fillstyle='full', markevery=markevery,label='BFU-DP',linewidth=l_w, markersize=m_s, markeredgewidth=marker_s)
 
 
 # plt.grid()
@@ -79,7 +78,7 @@ plt.xticks(x, labels, fontsize=20)
 
 
 # plt.title('(c) Utility Preservation', fontsize=24)
-plt.legend(loc='best',fontsize=20)
+plt.legend(loc='best',fontsize=18)
 plt.tight_layout()
 #plt.title("MNIST")
 plt.rcParams['figure.figsize'] = (2.0, 1)

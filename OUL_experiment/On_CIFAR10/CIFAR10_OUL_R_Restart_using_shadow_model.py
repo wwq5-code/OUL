@@ -1218,6 +1218,7 @@ er_reconstruction_set_loader = DataLoader(er_reconstruction_set, batch_size=args
 start_time = time.time()
 
 reconstructor_er_re = train_reconstructor(copy.deepcopy(fixed_vib_2), er_reconstruction_set_loader, reconstruction_function, args)
+reconstructor_er_re = evaluate_reconstructor(copy.deepcopy(fixed_vib_2),reconstructor_er_re, er_reconstruction_set_loader, reconstruction_function, args)
 end_time = time.time()
 running_time_recon = end_time - start_time
 print(f'reconstruction with unlearning intentions Training took {running_time_recon} seconds')
@@ -1270,5 +1271,5 @@ reconstructor_er_re = train_reconstructor(copy.deepcopy(fixed_vib_2), cons_set_l
 reconstructor_er_re = evaluate_reconstructor(copy.deepcopy(fixed_vib_2),reconstructor_er_re, er_reconstruction_set_loader, reconstruction_function, args)
 end_time = time.time()
 running_time_recon = end_time - start_time
-print(f'reconstruction with unlearning intentions Training took {running_time_recon} seconds')
+print(f'reconstruction without unlearning intentions Training took {running_time_recon} seconds')
 
