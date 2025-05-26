@@ -32,25 +32,24 @@ On MNIST, USS = 500
 | --------                  | --------    | -------- | -------- | -------- |  
 | Model Utility (Acc.)      | 98.52%      | 98.70%   |  98.53%  | 78.69%   | 
 | Data Removal (Bac. Acc.)  | 9.67%       | 9.16%    | 9.67%    | 0.00%    |  
-| Forgeability              | 0.942       | -        | -        | -        | 
-| Reconstruction Similarity | 0.818       | 0.874    | 1        | 1        |  
+| Forgeability              | 0.942       | -        | -        | -        |  
 | Running time (s)          | 3.920       | 16.03    | 11.70    | 0.63     |  
 
 In this table, we can achieve these metric values by running corresponding python files.
 
-1. To run the OUbLi on MNIST in black-box setting, we can run
+1. To run the OUbLi on MNIST in white-box setting, we can run
 ```
-python /OUL/OUL_experiment/On_MNIST/New_code_7May/MNIST_OUL_R_Restart_using_shadow_model_backdoor.py
+python /OUL/OUL_experiment/On_MNIST/MNIST_OUL_R_Restart.py
 ```
 
 2. To run the OUbLi on CIFAR10, we can run
 ```
-python /OUL/OUL_experiment/On_CIFAR10/New_code6May/CIFAR10_OUL_R_Restart_using_shadow_model.py
+python /OUL/OUL_experiment/On_CIFAR10/CIFAR10_OUL_R_Restart.py
 ```
 
 3. To run the OUbLi on CelebA, we can run
 ```
-python /OUL/OUL_experiment/On_CelebA/New_code6May/CelebA_OUL_R_Restart_using_shadow_model.py
+python /OUL/OUL_experiment/On_CelebA/CelebA_OUL_R_Restart.py
 ```
 
 Note that, to sucessfully run the program on CelebA, we need first prepare the CelebA dataset, which can be downloaded from: 
